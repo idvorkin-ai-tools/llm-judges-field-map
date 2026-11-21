@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Browser checks for the top-bar Plain / Technical / ELI5 control, in WebKit
+// Browser checks for the top-bar mode control and the unit menu, in WebKit
 // (iPad, touch) and Chromium (phone at 390, desktop at 1200).
 //
 //   python3 -m http.server 8731 &       # from the repo root
@@ -121,6 +121,42 @@ async function run(cfg) {
     const ov = await p.evaluate(() => [document.documentElement.scrollWidth, innerWidth]);
     ok(ov[0] <= ov[1], `${name} no horizontal scroll (${ov[0]} <= ${ov[1]})`);
   }
+
+  // unit menu behind the kicker
+  const btn = 'main .eyebrow .toc-btn';
+  const bb = await a.$eval(btn, x => { const r = x.getBoundingClientRect(); return [r.width, r.height]; });
+  ok(bb[1] >= 44, 'kicker button is 44px tall: ' + Math.round(bb[1]));
+  await press(a, touch, btn);
+  const menu = await a.evaluate(() => {
+    const n = document.getElementById('toc-pop'), r = n.getBoundingClientRect();
+    const links = [...n.querySelectorAll('a')];
+    return { open: !n.hidden, units: n.querySelectorAll('.toc-units > li').length, cur: (n.querySelector('[aria-current=page]') || {}).textContent,
+      secs: n.querySelectorAll('.toc-secs a').length, h2: document.querySelectorAll('main h2[id]').length,
+      small: links.filter(l => l.getBoundingClientRect().height < 44).length, right: r.right, left: r.left, vw: innerWidth,
+      expanded: document.querySelector('.toc-btn').getAttribute('aria-expanded') };
+  });
+  ok(menu.open && menu.expanded === 'true', 'tap on kicker opens the menu');
+  ok(menu.units === 10, 'lists all 10 units: ' + menu.units);
+  ok(/07/.test(menu.cur || ''), 'current unit marked: ' + menu.cur);
+  ok(menu.secs === menu.h2 && menu.h2 > 0, `lists this unit's sections: ${menu.secs}/${menu.h2}`);
+  ok(menu.small === 0, 'every menu link is at least 44px tall');
+  ok(menu.left >= 0 && menu.right <= menu.vw, `menu inside the viewport (${Math.round(menu.left)}..${Math.round(menu.right)} of ${menu.vw})`);
+  await press(a, touch, '#toc-pop .toc-secs a[href="#drift"]');
+  await a.waitForFunction(() => { const t = document.getElementById('drift').getBoundingClientRect().top; return t >= 0 && t < 200; }, null, { polling: 100, timeout: 5000 }).catch(() => {});
+  const jumped = await a.evaluate(() => ({ hash: location.hash, top: Math.round(document.getElementById('drift').getBoundingClientRect().top), hidden: document.getElementById('toc-pop').hidden }));
+  ok(jumped.hash === '#drift' && jumped.top >= 0 && jumped.top < 200 && jumped.hidden, `section link jumps and closes: ${JSON.stringify(jumped)}`);
+  await a.focus(btn);
+  await a.keyboard.press('Enter');
+  await a.keyboard.press('ArrowDown');
+  await a.keyboard.press('Escape');
+  const esc = await a.evaluate(() => ({ hidden: document.getElementById('toc-pop').hidden, focus: document.activeElement.classList.contains('toc-btn') }));
+  ok(esc.hidden && esc.focus, 'Esc closes the menu and returns focus to the kicker');
+  await c.bringToFront();
+  await press(c, touch, btn);
+  ok(await c.evaluate(() => /A/.test(document.querySelector('#toc-pop [aria-current=page]').textContent)), 'appendix page marks itself current');
+  await press(c, touch, '#toc-pop a[href="p03.html"]');
+  await c.waitForURL(/p03\.html$/, { timeout: 5000 }).catch(() => {});
+  ok(/p03\.html$/.test(c.url()), 'unit link navigates: ' + c.url());
 
   // old keys migrate (read only)
   const m = await ctx.newPage();

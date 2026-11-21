@@ -52,6 +52,10 @@ One file per term: `glossary/<id>.json`, where `<id>` is lowercase-with-hyphens.
 
 `class="tech-only"` hides an element unless Technical is on; `class="no-tech"` hides it when Technical is on. Use it only where it is cheap, such as an extra formula line. Don't write three versions of a page.
 
+## Unit menu
+
+On part pages, `site.js` turns the kicker (`.eyebrow .box`, "UNIT 07 OF 09") into a button that opens every unit, this one marked, with this page's `h2[id]` sections under it. The unit list is `UNITS` in `site.js`: add a row there when a unit is added or renamed. Every `h2` needs an `id`.
+
 ## Widgets
 
 A widget is a small chart with sliders, next to the text it illustrates. Three files per widget, all named after it:
