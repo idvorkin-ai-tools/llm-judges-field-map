@@ -10,7 +10,7 @@ A term box gives the plain meaning of a technical word beside its **first use on
 - **Technical**: the precise definition, plus a formula when there is one.
 - **ELI5**: one short, concrete sentence a child would get.
 
-Technical and ELI5 can both be on; then both show. The choice is stored in `localStorage` (`llm-judges-tech`, `llm-judges-eli5`), is set on `<html>` as `data-tech="on"` / `data-eli5="on"`, and applies live on every open page.
+The switches appear only on pages with at least one term box, and flipping one shows a short confirmation and flashes the boxes in view. Technical and ELI5 can both be on; then both show. The choice is stored in `localStorage` (`llm-judges-tech`, `llm-judges-eli5`), is set on `<html>` as `data-tech="on"` / `data-eli5="on"`, and applies live on every open page.
 
 ### Use a term on a page
 
@@ -123,6 +123,7 @@ Helpers on `LLMJWidgets`:
 - `t(x, y, text, cls, extra)`: an SVG `<text>`.
 - `f2`, `f3`, `cnt`, `pct`: number formats. `f3` gives 3 decimals trimmed to at least 2 (0.80, 0.467), matching the pages. Undefined values (0/0) print as "undefined" or a dash, never NaN.
 - `slider(id, label, min, max, step, value)`: a labelled range input with an `<output id="<id>-o">`.
+- `table2x2({cols, rows, cells})`: a 2×2 count table (confusion matrix, two-rater grid) styled by `.lab-cmt`; see the comment in `widgets.js` and its use in `widgets/roc.js`.
 - `stat(label, id, note)`, `presets([[key, label], …])`, `$(root, id)`, `uid()`.
 
 ### Rules

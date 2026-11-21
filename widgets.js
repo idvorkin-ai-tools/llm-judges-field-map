@@ -51,6 +51,22 @@
     }).join('') + '</div>';
   }
   function $(root, id) { return root.querySelector('#' + id); }
+  // A 2x2 count table (confusion matrix, two-rater grid) as HTML, styled by .lab-cmt.
+  // o = { cols: [h1, h2], rows: [{ head, sub }, { head, sub }],
+  //       cells: [[{ v, ok, note }, …], […]] }  (ok: true = green agreement cell, false = red)
+  function table2x2(o) {
+    var h = '<table class="lab-cmt"><tr><th></th><th>' + o.cols[0] + '</th><th>' + o.cols[1] + '</th></tr>';
+    for (var r = 0; r < 2; r++) {
+      var row = o.rows[r];
+      h += '<tr><th>' + row.head + (row.sub !== undefined ? ' <i>' + row.sub + '</i>' : '') + '</th>';
+      for (var c = 0; c < 2; c++) {
+        var x = o.cells[r][c];
+        h += '<td class="' + (x.ok ? 'ok' : 'crit') + '">' + x.v + (x.note ? '<small>' + x.note + '</small>' : '') + '</td>';
+      }
+      h += '</tr>';
+    }
+    return h + '</table>';
+  }
   var uidN = 0;
   function uid() { return ++uidN; }
   var makers = {};
@@ -84,6 +100,6 @@
   else { document.addEventListener('DOMContentLoaded', initAll); window.addEventListener('load', initAll); }
   window.LLMJWidgets = {
     KEYS: KEYS, W: W, mx: mx, w: w, smx: smx, t: t, f2: f2, f3: f3, cnt: cnt, pct: pct,
-    slider: slider, stat: stat, presets: presets, $: $, uid: uid, register: register, init: initAll
+    slider: slider, stat: stat, presets: presets, table2x2: table2x2, $: $, uid: uid, register: register, init: initAll
   };
 })();

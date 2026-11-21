@@ -16,7 +16,19 @@
   }
   // J's best cut is the cheapest when costMiss * share(YES) = costFalseYes * share(NO).
   function jImpliedRatio(nYes, nNo) { return nNo / nYes; }
-  var api = { cutCosts: cutCosts, jImpliedRatio: jImpliedRatio };
+  // Range of r = cost(miss) / cost(false YES) over which cut t is the cheapest real cut.
+  function cheapestRange(yes, no, t) {
+    var rows = cutCosts(yes, no, 1, 0).rows.slice(1), me = null, lo = 0, hi = Infinity;
+    rows.forEach(function (r) { if (r.t === t) me = r; });
+    rows.forEach(function (u) {
+      if (u === me) return;
+      var dfn = me.fn - u.fn, dfp = u.fp - me.fp; // cheaper iff r * dfn < dfp
+      if (dfn > 0) hi = Math.min(hi, dfp / dfn);
+      else if (dfn < 0) lo = Math.max(lo, dfp / dfn);
+    });
+    return lo < hi ? [lo, hi] : null;
+  }
+  var api = { cutCosts: cutCosts, jImpliedRatio: jImpliedRatio, cheapestRange: cheapestRange };
   if (typeof module === 'object' && module.exports) module.exports = api;
   else Object.assign(root.LLMJLab, api);
 })(this);
