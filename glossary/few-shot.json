@@ -1,6 +1,6 @@
 {
  "term": "Few-shot examples",
- "plain": "A handful of worked examples pasted into the judge's prompt to show it what a pass and a fail look like.",
- "eli5": "Showing someone three marked homework sheets before asking them to mark the rest.",
- "technical": "In-context examples (input, critique, label) included in the prompt; no weights change. Items used this way must be excluded from dev and test, or the evaluation leaks."
+ "plain": "A handful of worked examples put in the prompt to show the model what a good answer or grade looks like.",
+ "eli5": "Showing someone three finished puzzles before they do their own.",
+ "technical": "In-context demonstrations (input, desired output) prepended to the query; the model conditions on them without any weight update. Their selection and order can change outputs."
 }

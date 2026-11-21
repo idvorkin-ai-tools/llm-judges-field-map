@@ -1,6 +1,6 @@
 {
  "term": "Reward model",
- "plain": "A model trained to score outputs, whose scores are then used to train or pick the answers of another model.",
- "eli5": "A robot teacher whose gold stars are what the robot student learns to chase.",
- "technical": "A learned proxy for human preference used as the optimisation target in RLHF or best-of-n sampling. Gao, Schulman and Hilton (2022): as optimisation against it grows, true (gold) reward rises, peaks and then falls."
+ "plain": "A model trained to predict which answer people would prefer, used as the judge during training.",
+ "eli5": "A robot taster that learned what the real tasters like.",
+ "technical": "A learned scalar scorer r(x, y), typically fit to pairwise human preferences with a Bradley–Terry loss. It is a proxy judge; optimising hard against it exploits its errors (Gao et al. 2022)."
 }

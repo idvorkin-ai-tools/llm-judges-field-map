@@ -1,0 +1,6 @@
+{
+ "term": "Rubric",
+ "plain": "The written grading guide: what to look at, how to score each part, and examples of each grade.",
+ "eli5": "The teacher's list of what earns a gold star and what doesn't.",
+ "technical": "The scoring specification inside a judge prompt: named criteria, a response format per criterion (binary or ordinal), operational definitions, anchor exemplars and an aggregation (verdict) rule. Its inter-rater reliability with humans bounds the judge's."
+}

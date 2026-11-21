@@ -1,6 +1,6 @@
 {
  "term": "Criteria drift",
- "plain": "The rules for what counts as good change while people grade, because seeing outputs teaches them what they care about.",
- "eli5": "You only find out what you think a good sandcastle is after looking at a few.",
- "technical": "Shankar et al. (2024, EvalGen): evaluation criteria depend on the outputs graded, so early labels may follow a different policy from late ones; re-label once the rubric stabilises."
+ "plain": "Your idea of what “good” means changes as you read more real outputs, so the grading rules keep shifting.",
+ "eli5": "You start grading drawings for colour, then notice some have no faces and add a rule for that.",
+ "technical": "Shankar et al. (2024): evaluation criteria are partly defined by grading outputs, so they change during annotation and some depend on the specific outputs observed; criteria cannot be fully fixed before grading."
 }

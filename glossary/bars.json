@@ -1,0 +1,6 @@
+{
+ "term": "Behaviourally anchored rating scale (BARS)",
+ "plain": "A rating scale where every point is pinned to a real example of behaviour at that level.",
+ "eli5": "Instead of “1 to 5 stars”, each star comes with a picture of what that many stars looks like.",
+ "technical": "Smith and Kendall (1963): critical incidents are collected, retranslated (experts re-sort unlabelled incidents into dimensions; those that do not return are dropped), scaled, and low-agreement incidents discarded; the survivors anchor each scale point."
+}

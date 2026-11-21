@@ -1,0 +1,6 @@
+{
+ "term": "Model snapshot",
+ "plain": "A fixed, dated version of a model that never changes, unlike a name like “latest” that the provider can update.",
+ "eli5": "A photo of the recipe, so it tastes the same next year.",
+ "technical": "A versioned model identifier (usually with a date) whose weights are frozen, as opposed to an alias that silently points to newer weights. Pinning the judge to one, and logging it with each score, keeps scores comparable over time."
+}
