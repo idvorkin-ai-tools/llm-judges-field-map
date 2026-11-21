@@ -2,8 +2,8 @@
 //   <span class="term" data-term="kappa">Cohen's kappa</span>
 // This script loads glossary/kappa.json (one file per term, shared by every page)
 // and builds a box with three registers: plain (default), ELI5 and technical,
-// chosen by the Technical / ELI5 switches in the top bar (site.js, html[data-tech]
-// and html[data-eli5]; CSS in paper.css does the swap live).
+// chosen by the Plain / Technical / ELI5 control in the top bar (site.js sets
+// html[data-tech] or html[data-eli5]; CSS in paper.css does the swap live).
 // Wide screens: boxes sit in a right-hand margin rail beside their term.
 // Narrow screens: the term gets a small "?" chip that opens the box inline.
 // See docs/INTERACTIVE.md.
@@ -98,13 +98,14 @@
     requestAnimationFrame(function () { queued = false; layout(); });
   }
 
-  // Visible confirmation when a switch flips: a short toast, plus a flash on the
-  // boxes in view (or, on phones where boxes start closed, open the nearest one).
+  // Visible confirmation when the reader picks a mode on this page: a short toast,
+  // plus a flash on the boxes in view (or, on phones where boxes start closed,
+  // open the nearest one). Changes synced from another tab only swap the text.
   var toast = null, toastTimer = 0;
-  function feedback() {
+  var MODE_NAME = { plain: ['Plain', 'everyday words'], tech: ['Technical', 'precise definitions and formulas'], eli5: ['ELI5', 'explained as if to a five-year-old'] };
+  function feedback(m) {
     var root = document.documentElement;
-    var tech = root.getAttribute('data-tech') === 'on', eli5 = root.getAttribute('data-eli5') === 'on';
-    var mode = tech && eli5 ? 'ELI5 and technical' : tech ? 'technical' : eli5 ? 'ELI5' : 'plain';
+    var mode = MODE_NAME[m] || MODE_NAME.plain;
     var vh = window.innerHeight, seen = [];
     items.forEach(function (it) {
       var el = root.classList.contains('gl-rail-on') ? it.box : it.term, r = el.getBoundingClientRect();
@@ -122,10 +123,35 @@
       toast.setAttribute('role', 'status');
       document.body.appendChild(toast);
     }
-    toast.textContent = 'Term boxes now show ' + mode + ' definitions' + (seen.length ? '' : ' (' + items.length + ' on this page, beside the dotted terms)');
+    // No box on screen (say, at the top of a phone page): show the nearest
+    // term's text in the new mode inside the toast, so the change is visible.
+    var sample = '';
+    if (!seen.length && items.length) {
+      var near = items.slice().sort(function (x, y) { return dist(x) - dist(y); })[0];
+      var reg = near.box.querySelector(m === 'tech' ? '.gl-tech' : m === 'eli5' ? '.gl-eli5' : '.gl-plain');
+      var clone = reg.cloneNode(true), lab = clone.querySelector('.gl-reg');
+      if (lab) lab.remove();
+      sample = near.box.querySelector('.gl-t').textContent + ': ' + clone.textContent.trim();
+      if (sample.length > 170) sample = sample.slice(0, 167).replace(/\s+\S*$/, '') + '\u2026';
+    }
+    toast.innerHTML = '';
+    var head = document.createElement('b');
+    head.textContent = mode[0] + ' mode';
+    toast.appendChild(head);
+    toast.appendChild(document.createTextNode(': term boxes now use ' + mode[1] + '.'));
+    if (sample) {
+      var ex = document.createElement('span');
+      ex.className = 'gl-toast-ex';
+      ex.textContent = sample;
+      toast.appendChild(ex);
+    }
     toast.classList.add('gl-show');
     clearTimeout(toastTimer);
-    toastTimer = setTimeout(function () { toast.classList.remove('gl-show'); }, 2600);
+    toastTimer = setTimeout(function () { toast.classList.remove('gl-show'); }, sample ? 4500 : 2600);
+  }
+  function dist(it) {
+    var r = it.term.getBoundingClientRect();
+    return r.top > window.innerHeight ? r.top - window.innerHeight : r.bottom < 0 ? -r.bottom : 0;
   }
 
   function start() {
@@ -143,7 +169,10 @@
       els.forEach(function (el, n) { var d = cache[el.getAttribute('data-term')]; if (d) build(el, d, n); });
       layout();
       window.addEventListener('resize', relayout);
-      document.addEventListener('llmj:prefs', function () { relayout(); feedback(); });
+      document.addEventListener('llmj:prefs', function (e) {
+        relayout();
+        if (e.detail && e.detail.source === 'user') feedback(e.detail.mode);
+      });
       if (window.ResizeObserver) new ResizeObserver(relayout).observe(document.querySelector('main'));
       if (document.fonts && document.fonts.ready) document.fonts.ready.then(relayout);
       window.addEventListener('load', relayout);

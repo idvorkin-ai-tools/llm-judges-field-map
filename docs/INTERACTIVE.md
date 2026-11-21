@@ -4,13 +4,13 @@ Two kinds of interactive pieces sit on top of the static pages. Both are plain J
 
 ## Term boxes
 
-A term box gives the plain meaning of a technical word beside its **first use on a page**. Readers pick how it explains with two switches in the top bar (`site.js`):
+A term box gives the plain meaning of a technical word beside its **first use on a page**. Readers pick how it explains with one three-way control in the top bar (`site.js`), one mode at a time:
 
-- **Plain** (default, both switches off): one everyday sentence.
+- **Plain** (default): one everyday sentence.
 - **Technical**: the precise definition, plus a formula when there is one.
 - **ELI5**: one short, concrete sentence a child would get.
 
-The switches appear only on pages with at least one term box, and flipping one shows a short confirmation and flashes the boxes in view. Technical and ELI5 can both be on; then both show. The choice is stored in `localStorage` (`llm-judges-tech`, `llm-judges-eli5`), is set on `<html>` as `data-tech="on"` / `data-eli5="on"`, and applies live on every open page.
+The control appears only on pages with at least one term box. Tapping a mode swaps the text at once, shows a short toast naming the mode, and flashes the boxes in view (on phones, where boxes start closed, it opens the nearest one). The choice is stored in `localStorage` under `llm-judges-mode` (`plain`, `tech` or `eli5`) and set on `<html>` as `data-tech="on"` or `data-eli5="on"` (Plain sets neither). Other open pages follow through the `storage` event and only swap their text: no toast, and they never write storage back. Only a tap writes the key; a handler that wrote back on a `storage` event made open tabs re-send stale values to each other and the mode flipped by itself. The old `llm-judges-tech` / `llm-judges-eli5` keys are read once, as a fallback, and never written.
 
 ### Use a term on a page
 
@@ -51,6 +51,10 @@ One file per term: `glossary/<id>.json`, where `<id>` is lowercase-with-hyphens.
 ### Register-specific page text (optional, use sparingly)
 
 `class="tech-only"` hides an element unless Technical is on; `class="no-tech"` hides it when Technical is on. Use it only where it is cheap, such as an extra formula line. Don't write three versions of a page.
+
+## Unit menu
+
+On part pages, `site.js` turns the kicker (`.eyebrow .box`, "UNIT 07 OF 09") into a button that opens every unit, this one marked, with this page's `h2[id]` sections under it. The unit list is `UNITS` in `site.js`: add a row there when a unit is added or renamed. Every `h2` needs an `id`.
 
 ## Widgets
 
@@ -139,6 +143,13 @@ Helpers on `LLMJWidgets`:
 ```bash
 python3 tools/check_variants.py      # metaphor slots, term boxes, widget scripts
 node --test tools/                   # maths
+```
+
+If you touch `site.js`, `glossary.js` or the top bar, also run the browser check (WebKit iPad with touch, Chromium phone at 390 and desktop at 1200; two-tab sync, no echo, no overflow, no console errors). It needs a Playwright install with WebKit:
+
+```bash
+python3 -m http.server 8731 &
+PLAYWRIGHT=/path/to/node_modules/playwright node tools/browser_check.cjs http://127.0.0.1:8731
 ```
 
 Then load each changed page at 1200 and 390 px wide: no console errors, no horizontal scroll (`document.documentElement.scrollWidth <= innerWidth`), sliders work from the keyboard, and the metaphor menu switches the widget's words.
