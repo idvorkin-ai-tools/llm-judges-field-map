@@ -1,0 +1,6 @@
+{
+ "term": "Self-preference",
+ "plain": "A model judge rating answers from its own model family higher than equally good answers from others.",
+ "eli5": "Liking your own drawing best because it looks the way you would draw it.",
+ "technical": "Self-enhancement bias: an LLM judge assigns higher scores or win rates to outputs it (or its model family) generated, beyond what human raters give the same outputs (Zheng et al. 2023; Panickssery et al. 2024 tie it to the judge recognising its own text)."
+}
