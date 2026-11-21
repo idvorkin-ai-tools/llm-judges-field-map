@@ -59,9 +59,12 @@
       $(el, p + '-sum').textContent = 'TP ' + cnt(tp) + ', FN ' + cnt(fn) + ', FP ' + cnt(fp) + ', TN ' + cnt(tn) +
         '. Sensitivity ' + f3(tpr) + ', false positive rate ' + f3(fpr) + ', Youden\'s J ' + f3(m.j) + '.';
       // confusion matrix
-      $(el, p + '-cm').innerHTML = '<table class="lab-cmt"><tr><th></th><th>' + mx(w('judge')) + ' says ' + mx(w('yes')) + '</th><th>says ' + mx(w('no')) + '</th></tr>' +
-        '<tr><th>' + mx(w('tYes')) + ' <i>' + NY + '</i></th><td class="ok">' + cnt(tp) + '<small>true positive</small></td><td class="crit">' + cnt(fn) + '<small>missed</small></td></tr>' +
-        '<tr><th>' + mx(w('tNo')) + ' <i>' + NN + '</i></th><td class="crit">' + cnt(fp) + '<small>false positive</small></td><td class="ok">' + cnt(tn) + '<small>true negative</small></td></tr></table>';
+      $(el, p + '-cm').innerHTML = H.table2x2({
+        cols: [mx(w('judge')) + ' says ' + mx(w('yes')), 'says ' + mx(w('no'))],
+        rows: [{ head: mx(w('tYes')), sub: NY }, { head: mx(w('tNo')), sub: NN }],
+        cells: [[{ v: cnt(tp), ok: true, note: 'true positive' }, { v: cnt(fn), ok: false, note: 'missed' }],
+                [{ v: cnt(fp), ok: false, note: 'false positive' }, { v: cnt(tn), ok: true, note: 'true negative' }]]
+      });
       // score distributions
       var s = '', base = 140, top = 18;
       if (mode === 'case') {

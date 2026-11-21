@@ -60,7 +60,8 @@
   });
   document.addEventListener('DOMContentLoaded', function () {
     var mp = document.querySelector('.bar .mpick');
-    if (!mp) return;
+    // The switches only change term boxes, so pages without any don't show them.
+    if (!mp || !document.querySelector('.term[data-term]')) return;
     var wrap = document.createElement('div');
     wrap.className = 'prefs';
     wrap.setAttribute('role', 'group');

@@ -98,6 +98,36 @@
     requestAnimationFrame(function () { queued = false; layout(); });
   }
 
+  // Visible confirmation when a switch flips: a short toast, plus a flash on the
+  // boxes in view (or, on phones where boxes start closed, open the nearest one).
+  var toast = null, toastTimer = 0;
+  function feedback() {
+    var root = document.documentElement;
+    var tech = root.getAttribute('data-tech') === 'on', eli5 = root.getAttribute('data-eli5') === 'on';
+    var mode = tech && eli5 ? 'ELI5 and technical' : tech ? 'technical' : eli5 ? 'ELI5' : 'plain';
+    var vh = window.innerHeight, seen = [];
+    items.forEach(function (it) {
+      var el = root.classList.contains('gl-rail-on') ? it.box : it.term, r = el.getBoundingClientRect();
+      if (r.bottom > 0 && r.top < vh) seen.push(it);
+    });
+    if (!root.classList.contains('gl-rail-on') && seen.length && !seen.some(function (it) { return it.box.classList.contains('gl-open'); })) {
+      seen[0].chip.click();
+    }
+    seen.forEach(function (it) {
+      it.box.classList.remove('gl-flash'); void it.box.offsetWidth; it.box.classList.add('gl-flash');
+    });
+    if (!toast) {
+      toast = document.createElement('div');
+      toast.className = 'gl-toast';
+      toast.setAttribute('role', 'status');
+      document.body.appendChild(toast);
+    }
+    toast.textContent = 'Term boxes now show ' + mode + ' definitions' + (seen.length ? '' : ' (' + items.length + ' on this page, beside the dotted terms)');
+    toast.classList.add('gl-show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { toast.classList.remove('gl-show'); }, 2600);
+  }
+
   function start() {
     var els = Array.prototype.slice.call(document.querySelectorAll('.term[data-term]'));
     if (!els.length) return;
@@ -113,7 +143,7 @@
       els.forEach(function (el, n) { var d = cache[el.getAttribute('data-term')]; if (d) build(el, d, n); });
       layout();
       window.addEventListener('resize', relayout);
-      document.addEventListener('llmj:prefs', relayout);
+      document.addEventListener('llmj:prefs', function () { relayout(); feedback(); });
       if (window.ResizeObserver) new ResizeObserver(relayout).observe(document.querySelector('main'));
       if (document.fonts && document.fonts.ready) document.fonts.ready.then(relayout);
       window.addEventListener('load', relayout);
