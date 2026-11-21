@@ -1,0 +1,6 @@
+{
+ "term": "Gambler's fallacy",
+ "plain": "Believing a run of the same outcome makes the opposite outcome due next, when each case is independent.",
+ "eli5": "Thinking the coin “owes” you tails after three heads.",
+ "technical": "Expecting negative autocorrelation in independent outcomes. Chen, Moskowitz and Shue (2016) use it to explain judges' lower chance of repeating a decision after making it."
+}

@@ -1,0 +1,6 @@
+{
+ "term": "Reward model",
+ "plain": "A model trained to predict which answer people would prefer, used as the judge during training.",
+ "eli5": "A robot taster that learned what the real tasters like.",
+ "technical": "A learned scalar scorer r(x, y), typically fit to pairwise human preferences with a Bradley–Terry loss. It is a proxy judge; optimising hard against it exploits its errors (Gao et al. 2022)."
+}
