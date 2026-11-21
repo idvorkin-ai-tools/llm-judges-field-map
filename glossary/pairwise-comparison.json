@@ -1,0 +1,6 @@
+{
+ "term": "Pairwise comparison",
+ "plain": "Show the judge two outputs for the same prompt and ask which is better.",
+ "eli5": "Hold up two drawings and ask which one you like more.",
+ "technical": "Relative evaluation yielding win/tie/loss per pair; insensitive to monotone shifts in the judge's scale, but subject to position bias (judge both orders) and costing n(n−1)/2 comparisons for n systems."
+}

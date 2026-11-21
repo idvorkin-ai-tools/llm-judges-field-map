@@ -1,0 +1,7 @@
+{
+ "term": "Bradley–Terry model",
+ "plain": "A way to turn lots of “A beat B” results into one ranking with a strength score for each contender.",
+ "eli5": "If Sam usually beats Jo and Jo usually beats Kim, it works out how strong each player is.",
+ "technical": "P(i beats j) = p<sub>i</sub> / (p<sub>i</sub> + p<sub>j</sub>), strengths fitted by maximum likelihood over all comparisons (Bradley and Terry 1952; Zermelo 1929). A finite fit exists only if, however the contenders are split into two groups, each group has beaten the other at least once (Ford 1957). On the Elo scale r = 400·log<sub>10</sub>p.",
+ "formula": "P(i beats j) = 1 / (1 + 10<sup>(r<sub>j</sub> − r<sub>i</sub>)/400</sup>)"
+}
