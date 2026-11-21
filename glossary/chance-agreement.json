@@ -1,0 +1,7 @@
+{
+ "term": "Chance agreement",
+ "plain": "How often two judges would match anyway if each kept their usual habit but answered at random.",
+ "eli5": "If two kids both nearly always say “no”, they match a lot without even looking.",
+ "technical": "Expected agreement p<sub>e</sub> under independence, built only from each rater's marginal YES rate.",
+ "formula": "p<sub>e</sub> = p<sub>A,yes</sub>·p<sub>B,yes</sub> + p<sub>A,no</sub>·p<sub>B,no</sub>"
+}

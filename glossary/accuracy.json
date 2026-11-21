@@ -1,0 +1,7 @@
+{
+ "term": "Accuracy",
+ "plain": "The share of all calls that were right; easy to inflate when one answer is common.",
+ "eli5": "How many answers you got right on the whole test.",
+ "technical": "(TP + TN) / n: a prevalence-weighted mix of sensitivity and specificity, so it rewards matching the majority class. Compare it with the always-majority baseline.",
+ "formula": "accuracy = π·sens + (1 − π)·spec"
+}

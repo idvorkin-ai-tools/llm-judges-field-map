@@ -1,0 +1,6 @@
+{
+ "term": "Length bias",
+ "plain": "A judge that gives higher marks to longer answers just for being longer.",
+ "eli5": "Thinking the longest drawing is the best drawing.",
+ "technical": "Verbosity bias: positive dependence of judge scores on response length beyond quality; corrected by length-controlled win rates (e.g. AlpacaEval LC)."
+}

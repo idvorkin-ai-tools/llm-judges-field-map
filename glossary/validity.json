@@ -1,0 +1,6 @@
+{
+ "term": "Validity",
+ "plain": "Whether a judge measures the thing it is meant to measure, checked against something better than the judge.",
+ "eli5": "A scale that shows your real weight, not just the same wrong number.",
+ "technical": "Agreement of the measurement with the construct, estimated against a reference standard (criterion validity), e.g. via the confusion matrix against a gold set."
+}

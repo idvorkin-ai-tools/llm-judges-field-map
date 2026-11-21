@@ -1,0 +1,6 @@
+{
+ "term": "Gold set",
+ "plain": "A set of items that trained people have labelled carefully, used as the answer key for checking a judge.",
+ "eli5": "The teacher's answer sheet you mark the test against.",
+ "technical": "A human-labelled reference set, validated for inter-annotator agreement, used to estimate a judge's validity. The judge cannot be shown more valid than these labels."
+}

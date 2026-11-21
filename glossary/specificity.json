@@ -1,0 +1,7 @@
+{
+ "term": "Specificity",
+ "plain": "Of the items that really are NO, the share the judge correctly lets pass as NO.",
+ "eli5": "Of all the plain rocks, how many did you correctly leave alone?",
+ "technical": "True negative rate; 1 − specificity is the false positive rate. A row ratio, independent of prevalence.",
+ "formula": "TNR = TN / (TN + FP), FPR = 1 − TNR"
+}

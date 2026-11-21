@@ -1,0 +1,7 @@
+{
+ "term": "Kappa paradox",
+ "plain": "When one answer is very common, two judges can agree almost always and still get a low kappa.",
+ "eli5": "If nearly every apple is good, saying “good” every time matches a lot but shows you can't spot the bad ones.",
+ "technical": "Feinstein and Cicchetti (1990): high p<sub>o</sub> with low κ when the marginals are unbalanced, because p<sub>e</sub> approaches p<sub>o</sub>. Report positive and negative agreement alongside.",
+ "formula": "p<sub>pos</sub> = 2a / (2a + b + c), p<sub>neg</sub> = 2d / (2d + b + c)"
+}

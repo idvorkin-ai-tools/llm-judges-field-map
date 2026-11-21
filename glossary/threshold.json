@@ -1,0 +1,6 @@
+{
+ "term": "Threshold",
+ "plain": "The pass mark: scores at or above it count as YES.",
+ "eli5": "The line on the height chart you must reach to go on the ride.",
+ "technical": "The cut t that turns a continuous or ordinal score into a binary verdict; each t gives its own confusion matrix and ROC point."
+}
