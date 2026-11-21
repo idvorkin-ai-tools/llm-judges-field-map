@@ -1,0 +1,7 @@
+{
+ "term": "Temperature",
+ "plain": "A setting for how much randomness a language model uses when it picks its words; above zero, the same question can get different answers.",
+ "eli5": "A dial for how surprising the robot's answer is: turned down it says the same thing every time, turned up it mixes things up.",
+ "technical": "The softmax temperature T scales the logits before sampling: T → 0 approaches greedy decoding, larger T flattens the token distribution. Even at T = 0, batching and non-deterministic kernels can change outputs.",
+ "formula": "p<sub>i</sub> = exp(z<sub>i</sub>/T) / &Sigma;<sub>j</sub> exp(z<sub>j</sub>/T)"
+}
