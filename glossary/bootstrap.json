@@ -1,0 +1,6 @@
+{
+ "term": "Bootstrap",
+ "plain": "Estimate the error bar by re-drawing your own items at random, many times, and seeing how much the number moves.",
+ "eli5": "Pull sweets from the same bag again and again, putting each back, and see how much the count jumps around.",
+ "technical": "Efron (1979): resample the n items with replacement B times, recompute the statistic, and take the 2.5th and 97.5th percentiles (percentile interval). No variance formula needed; can be poor for very small n."
+}

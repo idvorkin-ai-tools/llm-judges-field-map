@@ -1,0 +1,6 @@
+{
+ "term": "Coincidence matrix",
+ "plain": "A table counting how often each pair of answers was given to the same item by different judges, ignoring who gave which.",
+ "eli5": "Count how often “yes” sat next to “no” on the same card, without caring who said which.",
+ "technical": "Krippendorff's values-by-values table: each item contributes all ordered pairs of values from distinct coders, weighted 1/(m<sub>u</sub> − 1), so it sums to the number of pairable ratings n. Symmetric; margins n<sub>v</sub> are value frequencies."
+}

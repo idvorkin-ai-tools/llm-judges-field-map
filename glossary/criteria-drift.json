@@ -1,0 +1,6 @@
+{
+ "term": "Criteria drift",
+ "plain": "The rules for what counts as good change while people grade, because seeing outputs teaches them what they care about.",
+ "eli5": "You only find out what you think a good sandcastle is after looking at a few.",
+ "technical": "Shankar et al. (2024, EvalGen): evaluation criteria depend on the outputs graded, so early labels may follow a different policy from late ones; re-label once the rubric stabilises."
+}

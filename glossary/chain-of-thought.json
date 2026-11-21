@@ -1,0 +1,6 @@
+{
+ "term": "Chain-of-thought",
+ "plain": "The step-by-step reasoning a model writes out before its answer.",
+ "eli5": "Showing your working on a maths problem.",
+ "technical": "Generated intermediate reasoning preceding a final answer. It is not guaranteed faithful: Turpin et al. (2023) show biased models rationalise the biased answer without mentioning the bias."
+}

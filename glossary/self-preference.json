@@ -1,0 +1,6 @@
+{
+ "term": "Self-preference",
+ "plain": "A judge giving higher marks to answers written by its own model, or its own model family, than people would.",
+ "eli5": "Marking your own drawing as the best one in the class.",
+ "technical": "Self-preference bias: an LLM evaluator scores its own generations above what human raters give to the same outputs. Panickssery et al. (2024) find it rises with the model's ability to recognise its own text."
+}

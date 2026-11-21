@@ -1,0 +1,6 @@
+{
+ "term": "Few-shot examples",
+ "plain": "A handful of worked examples pasted into the judge's prompt to show it what a pass and a fail look like.",
+ "eli5": "Showing someone three marked homework sheets before asking them to mark the rest.",
+ "technical": "In-context examples (input, critique, label) included in the prompt; no weights change. Items used this way must be excluded from dev and test, or the evaluation leaks."
+}
