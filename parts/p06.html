@@ -34,7 +34,7 @@
   </div>
 
   <h2 id="position">Position: whichever is shown first</h2>
-  <p>Ask a judge which of two answers is better, then swap them and ask again. A judge that responds only to the answers picks the same winner twice. Real judges often do not. With ChatGPT as the judge, <a href="https://arxiv.org/abs/2305.17926" target="_blank" rel="noopener">Wang et al. 2023</a> made Vicuna-13B beat ChatGPT on 66 of 80 questions just by choosing the order. The share of verdicts that change under a swap, their conflict rate, was 46.3% for GPT-4 and 82.5% for ChatGPT, and the two leaned opposite ways: GPT-4 to the first answer, ChatGPT to the second.</p>
+  <p>Ask a judge which of two answers is better, then swap them and ask again. A judge that responds only to the answers picks the same winner twice. Real judges often do not. With ChatGPT as the judge, <a href="https://arxiv.org/abs/2305.17926" target="_blank" rel="noopener">Wang et al. 2023</a> made Vicuna-13B beat ChatGPT on 66 of 80 questions just by choosing the order. On that comparison the share of verdicts that change under a swap, their conflict rate, was 46.3% for GPT-4 and 82.5% for ChatGPT, and the two leaned opposite ways: GPT-4 to the first answer, ChatGPT to the second.</p>
   <p><a href="https://arxiv.org/abs/2306.05685" target="_blank" rel="noopener">Zheng et al. 2023</a> ran a deliberately hard version: two near-identical answers to each MT-bench question, from the same model, judged in both orders. GPT-4 was consistent in 65% of cases, favoured the first answer in 30% and the second in 5%. Claude-v1 was consistent in only 23.8% and favoured the first in 75%. Wang et al. add that the closer the two answers, the likelier the flip. <span class="term" data-term="position-bias">Position bias</span> is a tie-breaker: it does the most damage where the comparison is hardest.</p>
 
   <figure class="fig wide"><button type="button" class="media" aria-label="Enlarge figure: one hundred pairs judged in both orders. 62 pairs get the same winner both ways. 30 pairs flip so that whichever item is shown first wins. 8 pairs flip so that whichever is shown second wins. A stacked bar shows 62, 30 and 8."><svg class="dg" viewBox="0 0 640 300" role="img" aria-label="One hundred pairs judged in both orders: 62 consistent, 30 flip to whichever is shown first, 8 flip to whichever is shown second."><title>Position swap on the casebook's 100 pairs: 62 consistent, 30 first wins, 8 second wins.</title>
@@ -67,11 +67,11 @@
   <p>Now suppose a leaderboard script always puts model X's answer first. The 62 consistent pairs go to whichever answer is better. Of the 38 that flip, X collects 30 and the rival 8, purely from the slot: a 22-pair swing that has nothing to do with quality and is invisible in the final win rate.</p>
   <p>The fix is the oldest one: run both orders. Zheng et al.'s conservative rule counts a win only when the same answer wins both ways and a tie otherwise, turning the casebook into 62 decided pairs and 38 ties. Wang et al.'s balanced position calibration averages scores across the two orders, keeping more signal when the judge emits scores. Either way, report the swap rate beside the win rate: it is the cheapest reliability number a judge gives you.</p>
 
-  <p class="lab-try"><b>Try this</b>Start from the casebook, then load Claude-v1's split: watch X's record inflate while the both-orders result stays put. Set both flip sliders to zero and the two bars agree.</p>
+  <p class="lab-try"><b>Try this</b>Start from the casebook, then load Claude-v1's split: X's record inflates while the both-orders result stays even between X and the rival, with more ties. Set both flip sliders to zero and the two bars agree.</p>
   <div class="lab" data-lab="swap"></div>
 
   <div class="mx case">
-    <div data-m="hire"><span class="mlabel">The two finalists</span><p>A committee that meets two finalists in a fixed order is running the single-order test. Splitting the interviewers, half seeing A first and half B, is the swap. If the debrief splits along that line, order, not the candidates, decided several votes.</p></div>
+    <div data-m="hire"><span class="mlabel">The two finalists</span><p>Splitting the interviewers, half meeting finalist A first and half B, is the swap. If the debrief splits along that line, order, not the candidates, decided several votes.</p></div>
     <div data-m="review"><span class="mlabel">The stack rank</span><p>A calibration meeting that discusses employees in the same order every cycle gives the first names a fresh room and the last a tired one. Rotating the order each cycle is the swap; comparing two close employees twice, each one first once, is the swap by hand.</p></div>
     <div data-m="wine"><span class="mlabel">Two glasses side by side</span><p>Many competitions randomise the pour order, and sensory scientists balance which glass sits on the left in a paired test. A judge who prefers the left glass on both pours of the same pair has shown a position preference, not a palate.</p></div>
     <div data-m="med"><span class="mlabel">Comparing two images</span><p>Pairwise judging in medicine is mostly the comparison with last year's image. Reader studies comparing two methods counterbalance the reading order: half the readers see method A first, half method B.</p></div>
@@ -232,11 +232,11 @@
 
   <h2 id="can-say">What you can say now</h2>
   <ul>
-    <li>Pairwise LLM judges flip when the answers swap places, most on close calls: GPT-4 was consistent on 65% of Zheng et al.'s hard pairs; in the casebook 38 of 100 pairs flip, 30 towards the first-shown answer.</li>
-    <li>Running both orders and counting a flip as a tie removes position bias and gives a free reliability number, the swap rate.</li>
-    <li>Order and sequence effects are measured in people: identical wines win when poured first, and asylum judges, loan officers and umpires avoid repeating a decision. Stateless, shuffled grading removes both.</li>
-    <li>Length and style move scores, human and model alike; the repetitive-list attack and a reformat test expose it, and length or style control corrects it.</li>
-    <li>Any number in the prompt is an anchor. A verified reference helps; a prior score makes the second reading a partial copy.</li>
+    <li>Pairwise judges flip when answers swap places, most on close calls: 38 of the casebook's 100 pairs.</li>
+    <li>Both orders, with a flip counted as a tie, removes position bias and yields the swap rate.</li>
+    <li>Order and sequence effects are measured in people; stateless, shuffled grading removes them.</li>
+    <li>Length and style move scores; padding and reformat tests expose it, length or style control corrects it.</li>
+    <li>Any number in the prompt is an anchor: verify references, hide prior scores.</li>
   </ul>
 
   <h2 id="sources">Sources</h2>

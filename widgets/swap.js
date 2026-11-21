@@ -3,11 +3,11 @@
   var H = window.LLMJWidgets, L = window.LLMJLab;
   if (!H || !L) return;
   var mx = H.mx, w = H.w, t = H.t, cnt = H.cnt, pct = H.pct, slider = H.slider, stat = H.stat, $ = H.$;
-  var P = { casebook: [30, 8, 50], gpt4: [30, 5, 50], claude: [75, 1, 50], fair: [0, 0, 50] };
+  var P = { casebook: [30, 8, 50], gpt4: [30, 5, 50], claude: [75, 0, 50], fair: [0, 0, 50] };
   H.register('swap', function (el) {
     var p = 'sw' + H.uid();
     el.innerHTML =
-      H.presets([['casebook', 'Casebook 62/30/8'], ['gpt4', 'GPT-4, Zheng 65/30/5'], ['claude', 'Claude-v1, Zheng ~24/75/1'], ['fair', 'No position bias']]) +
+      H.presets([['casebook', 'Casebook 62/30/8'], ['gpt4', 'GPT-4, Zheng 65/30/5'], ['claude', 'Claude-v1, Zheng 75% first'], ['fair', 'No position bias']]) +
       '<div class="lab-ctl">' + slider(p + '-f', 'Pairs that flip to whichever is shown <b>first</b>', 0, 100, 1, 30) +
       slider(p + '-s', 'Pairs that flip to whichever is shown <b>second</b>', 0, 100, 1, 8) +
       slider(p + '-q', 'Of the consistent pairs, share where X is truly better', 0, 100, 1, 50) + '</div>' +
