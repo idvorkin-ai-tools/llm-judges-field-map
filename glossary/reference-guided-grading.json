@@ -1,0 +1,6 @@
+{
+ "term": "Reference-guided grading",
+ "plain": "Give the judge a known-good answer to grade the output against.",
+ "eli5": "Checking your sum against the answer at the back of the book.",
+ "technical": "The judge prompt includes a reference solution (human key or the judge's own separately generated answer); Zheng et al. cut maths grading failures from 70% to 15% this way. Risk: anchoring on the reference and penalising valid alternatives."
+}
