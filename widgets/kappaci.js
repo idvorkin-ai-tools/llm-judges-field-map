@@ -24,12 +24,13 @@
       var r = L.kappaInterval(po, pe, n), wl = L.wilson(po, n);
       $(el, p + '-n-o').textContent = n;
       nIn.setAttribute('aria-valuetext', n + ' items');
-      $(el, p + '-k').innerHTML = f2(r.kappa) + ' <small>(' + f2(r.lo) + '&ndash;' + f2(r.hi) + ')</small>';
+      $(el, p + '-k').innerHTML = f2(r.kappa) + ' <small>(' + f2(Math.max(-1, r.lo)) + '&ndash;' + f2(Math.min(1, r.hi)) + ')</small>';
       $(el, p + '-w').innerHTML = f2(po) + ' <small>(' + H.f3(wl.lo) + '&ndash;' + H.f3(wl.hi) + ')</small>';
       $(el, p + '-need').innerHTML = Math.round(L.itemsForKappa(po, pe, 0.1)).toLocaleString('en-US');
-      var lo = Math.max(-0.2, r.lo), hi = Math.min(1, r.hi);
-      $(el, p + '-sum').textContent = 'With ' + n + ' items, kappa ' + f2(r.kappa) + ' could plausibly be anywhere from ' + f2(r.lo) + ' to ' + f2(r.hi) +
-        ': from "' + word(r.lo) + '" to "' + word(r.hi) + '".';
+      var lo = Math.max(-0.2, r.lo), hi = Math.min(1, r.hi); // drawn range
+      var broke = r.hi > 1 || r.lo < -1, clo = Math.max(-1, r.lo), chi = Math.min(1, r.hi);
+      $(el, p + '-sum').textContent = 'With ' + n + ' items, kappa ' + f2(r.kappa) + ' could plausibly be anywhere from ' + f2(clo) + ' to ' + f2(chi) +
+        ': from "' + word(clo) + '" to "' + word(chi) + '".' + (broke ? ' The formula\'s interval runs past the possible range here: with this few items the large-sample approximation breaks down, and the bootstrap in the appendix is the one to trust.' : '');
       var X = function (k) { return 30 + 300 * (k + 0.2) / 1.2; }, s = '';
       s += '<rect x="' + X(-0.2) + '" y="20" width="' + (X(0) - X(-0.2)) + '" height="22" class="box-crit"/>';
       BANDS.forEach(function (b, i) {
@@ -41,7 +42,7 @@
       s += '<line x1="' + X(lo) + '" y1="82" x2="' + X(lo) + '" y2="98" class="ln-off"/><line x1="' + X(hi) + '" y1="82" x2="' + X(hi) + '" y2="98" class="ln-off"/>';
       s += '<circle cx="' + X(r.kappa) + '" cy="90" r="6" fill="var(--off-bright)"/>';
       s += '<line x1="' + X(0.8) + '" y1="18" x2="' + X(0.8) + '" y2="104" class="ln-def" stroke-dasharray="4 4"/>';
-      s += t(180, 124, 'kappa ' + f2(r.kappa) + ', 95% interval ' + f2(r.lo) + ' to ' + f2(r.hi) + (r.lo < -0.2 ? ' (cut off at left)' : ''), 't-ink', 'font-size="11" text-anchor="middle"');
+      s += t(180, 124, 'kappa ' + f2(r.kappa) + ', 95% interval ' + f2(Math.max(-1, r.lo)) + ' to ' + f2(Math.min(1, r.hi)) + (r.lo < -0.2 ? ' (cut off at left)' : ''), 't-ink', 'font-size="11" text-anchor="middle"');
       svg.innerHTML = s;
     }
     nIn.addEventListener('input', draw);

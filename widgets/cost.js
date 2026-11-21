@@ -20,7 +20,7 @@
     var rIn = $(el, p + '-r'), svg = el.querySelector('.lab-cost'), cur = 1; // presets keep their exact ratio
     function draw() {
       var r = cur, c = costs(r), res = L.cutCosts(L.CASE_YES, L.CASE_NO, c[0], c[1]);
-      var label = Math.abs(r - 1) < 1e-9 ? 'equal costs' : r > 1 ? 'a miss costs ' + nice(r) + ' a false YES' : 'a false YES costs ' + nice(r) + ' a miss';
+      var label = Math.abs(r - 1) < 1e-9 ? 'both mistakes cost the same' : r > 1 ? 'a miss costs ' + nice(r) + ' a false YES' : 'a false YES costs ' + nice(r) + ' a miss';
       $(el, p + '-r-o').innerHTML = r > 1 ? 'miss ' + nice(r) : r < 1 ? 'false YES ' + nice(r) : 'equal';
       rIn.setAttribute('aria-valuetext', label.replace('&times;', ' times'));
       var cuts = res.rows.slice(1); // >=5 .. >=1
@@ -38,8 +38,10 @@
       s += t(X0 - 8, base + 30, 'miss/false', 't-dim', 'font-size="9" text-anchor="end"');
       s += t(X0 - 8, 30, 'total', 't-dim', 'font-size="10" text-anchor="end"') + t(X0 - 8, 42, 'cost', 't-dim', 'font-size="10" text-anchor="end"');
       svg.innerHTML = s;
-      $(el, p + '-sum').innerHTML = 'With ' + label + ', the cheapest cut is ≥ ' + res.best.t + ': ' + res.best.fn + ' misses and ' + res.best.fp + ' false YESes, total cost ' + cnt(res.best.cost) + '.';
-      $(el, p + '-note').innerHTML = 'Youden\'s J always picks ≥ 4, which is cheapest only near 140/60 = 2.3&times; (the class balance of the gold set). ' +
+      $(el, p + '-sum').innerHTML = 'If ' + label + ', the cheapest cut is ≥ ' + res.best.t + ': ' + res.best.fn + ' misses and ' + res.best.fp + ' false YESes, total cost ' + cnt(res.best.cost) + '.';
+      var rg = L.cheapestRange(L.CASE_YES, L.CASE_NO, 4);
+      $(el, p + '-note').innerHTML = 'Youden\'s J always picks \u2265 4. Here that is the cheapest cut only while a miss costs between ' +
+        (Math.round(rg[0] * 10) / 10) + '&times; and ' + (Math.round(rg[1] * 10) / 10) + '&times; a false YES; J\'s built-in assumption is 140/60 = 2.3&times;, the class balance of the gold set. ' +
         (res.never.cost < res.best.cost ? 'At this ratio, never saying YES at all (cost ' + cnt(res.never.cost) + ') would be cheaper still: the gate would block everything.' : '');
     }
     rIn.addEventListener('input', function () { cur = ratioAt(+rIn.value); draw(); });

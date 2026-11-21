@@ -16,3 +16,9 @@ test('p05#cost table: equal, miss 20x, false YES 5x', () => {
 test('J assumes a miss costs 140/60 = 2.33 false YESes', () => {
   assert.ok(Math.abs(C.jImpliedRatio(60, 140) - 2.333) < 1e-3);
 });
+
+test('>=4 is the cheapest cut for a miss costing 0.7x to 5.17x a false YES', () => {
+  const [lo, hi] = C.cheapestRange(L.CASE_YES, L.CASE_NO, 4);
+  assert.ok(Math.abs(lo - 0.7) < 1e-9); assert.ok(Math.abs(hi - 31 / 6) < 1e-9);
+  assert.ok(lo < C.jImpliedRatio(60, 140) && C.jImpliedRatio(60, 140) < hi);
+});

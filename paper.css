@@ -371,3 +371,10 @@ html[data-tech="on"] .no-tech{display:none}
 @media (max-width:480px){.prefs{gap:4px}.pref{padding:4px 5px;gap:3px;font-size:10.5px}.mpick select{max-width:118px;padding:5px 4px}}
 .lab svg.lab-cost,.lab svg.lab-ci{max-width:560px;margin:6px auto}
 .lab .statgrid .s .v small{font-size:12px;color:var(--ink-dim);font-weight:400}
+/* switch feedback (glossary.js) */
+.gl-toast{position:fixed;left:50%;bottom:18px;transform:translate(-50%,20px);opacity:0;pointer-events:none;z-index:60;
+  max-width:calc(100vw - 32px);font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--ink);background:var(--panel-2);
+  border:1px solid var(--def);border-radius:8px;padding:8px 12px;box-shadow:0 6px 24px rgba(0,0,0,.5);transition:opacity .2s,transform .2s}
+.gl-toast.gl-show{opacity:1;transform:translate(-50%,0)}
+@media (prefers-reduced-motion:no-preference){.gl-box.gl-flash{animation:glflash 1.2s ease-out}}
+@keyframes glflash{0%{box-shadow:0 0 0 4px rgba(53,207,224,.6)}100%{box-shadow:0 0 0 0 rgba(53,207,224,0)}}
