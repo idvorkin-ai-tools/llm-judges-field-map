@@ -1,0 +1,7 @@
+{
+ "term": "Standard error",
+ "plain": "How much a number measured on a sample would typically move if you measured it again on a fresh sample.",
+ "eli5": "How much your guess would wobble if you counted a different handful of sweets.",
+ "technical": "The standard deviation of an estimator's sampling distribution. A 95% normal interval is ± 1.96 SE; a difference between independent estimates has SE √(SE₁² + SE₂²).",
+ "formula": "SE(p̂) = √(p(1 − p)/n)"
+}

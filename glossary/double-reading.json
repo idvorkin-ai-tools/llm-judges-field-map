@@ -1,0 +1,6 @@
+{
+ "term": "Double reading",
+ "plain": "Two people judge the same item independently, and a third person or a discussion settles any disagreement.",
+ "eli5": "Two teachers mark the same test without peeking, and the head teacher decides if they differ.",
+ "technical": "Independent duplicate assessment with an arbitration rule, standard in European mammography screening. With arbitration it raises detection and lowers recall rates (Taylor and Potts 2008); without it, recalls rise."
+}

@@ -1,0 +1,7 @@
+{
+ "term": "Wald interval",
+ "plain": "The textbook “plus or minus” error bar for a share; simple, but unreliable with few items or rates near 0 or 1.",
+ "eli5": "The quick “give or take” that sometimes says less than none or more than all.",
+ "technical": "p̂ ± z√(p̂(1 − p̂)/n), from the normal approximation with the SE evaluated at p̂. Coverage oscillates and falls well below nominal for small n or extreme p (Brown, Cai and DasGupta 2001); it collapses to a point at p̂ = 0 or 1.",
+ "formula": "p̂ ± z√(p̂(1 − p̂)/n)"
+}

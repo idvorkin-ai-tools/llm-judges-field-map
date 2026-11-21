@@ -1,0 +1,7 @@
+{
+ "term": "Wilson interval",
+ "plain": "The recommended way to put an error bar on a share like 48 out of 60; it stays sensible with few items or extreme rates.",
+ "eli5": "A smarter “give or take” for small counts, which never says less than none or more than all.",
+ "technical": "Wilson (1927) score interval: invert the score test for a binomial proportion. Unlike the Wald interval p̂ ± z√(p̂(1−p̂)/n), its centre is pulled toward ½ and it stays inside [0, 1]; Brown, Cai and DasGupta (2001) recommend it for small n.",
+ "formula": "(p̂ + z²/2n ± z√(p̂(1−p̂)/n + z²/4n²)) / (1 + z²/n)"
+}

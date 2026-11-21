@@ -1,0 +1,7 @@
+{
+ "term": "Rogan–Gladen correction",
+ "plain": "A formula that works back from an imperfect judge's pass rate to the true rate, using its known error rates.",
+ "eli5": "If your scale always adds two kilos, take two kilos off to get your real weight.",
+ "technical": "Rogan and Gladen (1978): since measured = (1 − spec) + J·true, invert to estimate true prevalence. Requires sens and spec to hold on this population; undefined at J = 0, and estimates can fall outside [0, 1].",
+ "formula": "true = (measured + spec − 1) / (sens + spec − 1)"
+}
