@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>LLM Judges, mapped</title>
+<meta name="description" content="A mini-course on LLM judges: policies, grading formats, inter-judge agreement, the confusion matrix and Youden's J, failure modes, and validating a judge, told through hiring, reviews, wine, medicine and umpires." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="paper.css" />
+<script src="site.js"></script>
+<style>
+  main{max-width:960px}
+  .hero{padding:24px 0 8px}
+  .hero h1{font-size:clamp(32px,5.5vw,52px);line-height:1.05;margin:10px 0 14px;letter-spacing:-.01em}
+  .hero .sub{font-size:18px;color:var(--ink-dim);max-width:760px;line-height:1.55}
+  .answer{margin:28px 0 6px;padding:20px 24px;border-left:3px solid var(--off);background:var(--panel);
+    border-radius:0 12px 12px 0;color:var(--ink-mid);font-size:16.5px;line-height:1.6;max-width:780px}
+  .answer b{color:var(--ink)}
+  .facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:26px 0 8px}
+  .fact{border:1px solid var(--line-soft);border-radius:8px;padding:12px 14px}
+  .fact .k{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-dim)}
+  .fact .v{font-size:17px;font-weight:600;margin-top:4px}
+  .rungs{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;margin:22px 0 4px}
+  .rungs a{display:block;border:1px solid var(--line-soft);border-radius:8px;padding:10px 12px;text-decoration:none;color:var(--ink)}
+  .rungs a:hover{border-color:var(--def)}
+  .rungs .n{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.12em;color:var(--off-bright)}
+  .rungs a.c .n{color:var(--def)}
+  .rungs b{display:block;font-size:14px;margin-top:3px;line-height:1.3}
+  section{padding:56px 0;border-bottom:1px solid var(--line-soft);scroll-margin-top:64px}
+  section:last-of-type{border-bottom:none}
+  .arc-head{display:flex;align-items:baseline;gap:14px;margin:0 0 6px;flex-wrap:wrap}
+  .arc-head .idx{font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:.14em;color:var(--ink-dim)}
+  .arc-head h2{margin:0;font-size:26px}
+  .arc-sub{color:var(--ink-dim);margin:0 0 22px;max-width:720px}
+  .row{display:grid;grid-template-columns:44px 1fr;gap:14px;padding:16px 0;border-top:1px solid var(--line-soft);align-items:start}
+  .row:first-of-type{border-top:none}
+  .row .num{font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--ink-dim);padding-top:3px}
+  .row .name{font-weight:600;font-size:17px;line-height:1.3}
+  .row .name a{color:var(--ink)}
+  .row .meta{font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:var(--ink-dim);margin:4px 0 6px;display:flex;flex-wrap:wrap;gap:10px}
+  .row .meta .x{color:var(--def)}
+  .row .meta .f{color:var(--off-bright)}
+  .row .desc{color:var(--ink-dim);font-size:14.5px;line-height:1.55}
+  .amber .row .name a:hover{color:var(--off)} .cyan .row .name a:hover{color:var(--def)}
+  .check{width:16px;height:16px;border:1px solid var(--ink-dim);border-radius:4px;display:inline-block;vertical-align:-3px;margin-right:6px;cursor:pointer;background:transparent}
+  .check.on{background:var(--off);border-color:var(--off)}
+  .cyan .check.on{background:var(--def);border-color:var(--def)}
+  .links{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px}
+  .links a{display:block;border:1px solid var(--line-soft);border-radius:8px;padding:12px 14px;color:var(--ink);text-decoration:none}
+  .links a:hover{border-color:var(--def)}
+  .links a b{display:block;font-size:15px;margin-bottom:3px}
+  .links a span{font-size:13px;color:var(--ink-dim)}
+  .progress{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--ink-dim);margin-top:8px}
+  .legend{font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:var(--ink-dim);margin:0 0 14px}
+  .legend .x{color:var(--def)} .legend .f{color:var(--off-bright)}
+  @media (max-width:560px){.row{grid-template-columns:34px 1fr;gap:10px}}
+  table.rosetta{min-width:860px}
+  table.rosetta td{font-size:13.5px;line-height:1.45}
+</style>
+</head>
+<body>
+<header class="bar"><div class="bar-in">
+  <div class="brand"><span class="dot"></span>LLM&nbsp;JUDGES&nbsp;//&nbsp;FIELD&nbsp;MAP</div>
+  <a class="back" href="https://idvorkin-ai-tools.github.io/">&larr; all field maps</a>
+</div></header>
+<main>
+  <div class="hero">
+    <div class="eyebrow"><span class="box wb mono">A MINI-COURSE</span><span class="mono">nine units &middot; one maths appendix &middot; five metaphors</span></div>
+    <h1>LLM Judges, mapped</h1>
+    <p class="sub">An LLM judge reads a model's output and grades it. This course is about whether to believe the grade: what the judge is told good means, how it is asked, whether judges agree, whether they track the truth, how they go wrong, and how to check one before trusting it.</p>
+
+    <div class="answer">
+      <b>Like everything in ML, nothing here is new.</b> People have graded without an answer key for centuries. Interviewers decide who to hire, managers rate a half-year of work, wine judges award medals, radiologists decide who to call back, umpires call strikes. Each of those fields has already found how judges disagree, drift and flatter, and has statistics for it: Cohen's kappa came from psychology, sensitivity, specificity and Youden's J from diagnostic medicine, the halo effect from officers rating soldiers. An LLM judge inherits all of it. The menu at the top switches every example on the site between those five worlds; the concepts and the numbers stay the same.
+    </div>
+
+    <div class="facts">
+      <div class="fact"><div class="k">Units</div><div class="v">9 + maths appendix</div></div>
+      <div class="fact"><div class="k">Metaphors</div><div class="v">5, switchable</div></div>
+      <div class="fact"><div class="k">Running example</div><div class="v">one casebook, same numbers</div></div>
+      <div class="fact"><div class="k">Key statistics</div><div class="v">&kappa;, &alpha;, J, AUC</div></div>
+      <div class="fact"><div class="k">Starts from</div><div class="v"><a class="lnk" href="https://idvork.in/subjective-evals" target="_blank" rel="noopener">Evals with no right answer</a></div></div>
+    </div>
+
+    <div class="rungs" aria-label="The arcs">
+      <a href="#frame"><span class="n">ARC 0</span><b>Nothing here is new</b></a>
+      <a href="#asking"><span class="n">ARC 1</span><b>What are we asking?</b></a>
+      <a href="#measuring" class="c"><span class="n">ARC 2</span><b>Measuring the judge</b></a>
+      <a href="#failing" class="c"><span class="n">ARC 3</span><b>How judges go wrong</b></a>
+      <a href="#using"><span class="n">ARC 4</span><b>Using a judge</b></a>
+      <a href="#appendix" class="c"><span class="n">APPENDIX</span><b>The maths, worked</b></a>
+    </div>
+    <p class="progress" id="progress">Tick a unit when you have read it; this browser remembers.</p>
+  </div>
+
+  <section id="rosetta">
+    <div class="arc-head"><span class="idx">THE FIVE METAPHORS</span><h2>One concept, five rooms</h2></div>
+    <p class="arc-sub">Every unit tells its examples in the domain you pick. This table is the key: the same slot in each world. Click a column heading, or use the menu at the top, to switch the whole site. You are reading <b><span class="mx"><span data-m="hire">job interviews</span><span data-m="review">performance reviews</span><span data-m="wine">wine judging</span><span data-m="med">medicine</span><span data-m="ump">umpires and referees</span></span></b>.</p>
+    <div class="scroll"><table class="kv rosetta">
+<tr><th>Concept</th><th>LLM eval</th><th data-col="hire"><button type="button" data-set-m="hire">Job interviews</button></th><th data-col="review"><button type="button" data-set-m="review">Performance reviews</button></th><th data-col="wine"><button type="button" data-set-m="wine">Wine judging</button></th><th data-col="med"><button type="button" data-set-m="med">Medicine</button></th><th data-col="ump"><button type="button" data-set-m="ump">Umpires</button></th></tr>
+<tr><td>The judge</td><td>the LLM judge</td><td data-col="hire">interviewer</td><td data-col="review">manager</td><td data-col="wine">competition judge</td><td data-col="med">radiologist</td><td data-col="ump">plate umpire</td></tr>
+<tr><td>What is judged</td><td>a model's response</td><td data-col="hire">a candidate's interview</td><td data-col="review">an employee's half-year</td><td data-col="wine">a wine, poured blind</td><td data-col="med">a screening mammogram</td><td data-col="ump">a pitch the batter took</td></tr>
+<tr><td>Yes / no</td><td>pass / fail</td><td data-col="hire">hire / no hire</td><td data-col="review">exceeds / meets</td><td data-col="wine">medal / no medal</td><td data-col="med">recall / clear</td><td data-col="ump">strike / ball</td></tr>
+<tr><td>The policy</td><td>judge prompt and rubric</td><td data-col="hire">structured scorecard</td><td data-col="review">rating definitions</td><td data-col="wine">score sheet</td><td data-col="med">BI-RADS categories</td><td data-col="ump">rulebook strike zone</td></tr>
+<tr><td>Two judges</td><td>two human labelers</td><td data-col="hire">Ana and Ben</td><td data-col="review">Carla and Dev</td><td data-col="wine">Elodie and Femi</td><td data-col="med">Dr Gale and Dr Hart</td><td data-col="ump">Ivo and June</td></tr>
+<tr><td>Where truth comes from</td><td>human gold labels</td><td data-col="hire">performance a year on, hires only</td><td data-col="review">nothing outside: committee consensus</td><td data-col="wine">nothing for quality: panels, replicate pours</td><td data-col="med">biopsy and follow-up</td><td data-col="ump">pitch-tracking cameras</td></tr>
+<tr><td>Compare two</td><td>A-vs-B preference</td><td data-col="hire">two finalists, one opening</td><td data-col="review">stack ranking</td><td data-col="wine">two glasses side by side</td><td data-col="med">this year's image against last year's</td><td data-col="ump">replay review</td></tr>
+<tr><td>A classic bias</td><td>prefers longer answers</td><td data-col="hire">prefers people like the interviewer</td><td data-col="review">rates own hires high</td><td data-col="wine">order in the flight</td><td data-col="med">satisfaction of search</td><td data-col="ump">calls shaped by the previous pitch</td></tr>
+    </table></div>
+    <p class="arc-sub">The domains differ most in the row that matters most: where truth comes from. Pitch calls can be checked against a camera, mammograms against biopsy; hiring learns the truth late and only for people it hired; wine quality and performance ratings have nothing outside other judges. LLM tasks spread across the same range, and <a class="lnk" href="parts/p01.html#truth">unit 01</a> places them on it.</p>
+  </section>
+
+  <section id="frame" class="amber">
+    <div class="arc-head"><span class="idx">ARC 0</span><h2>Nothing here is new</h2></div>
+    <p class="arc-sub">Why anyone uses a judge, why it is a measuring instrument, and the two questions every instrument must answer. After this arc you can separate reliability from validity and say where the truth for a task comes from.</p>
+    <div class="row"><div class="num"><span class="check" data-p="p01"></span>01</div><div><div class="name"><a href="parts/p01.html">Nothing here is new</a></div><div class="meta"><span>why judges &middot; reliability and validity &middot; where truth comes from</span></div><div class="desc">The judge as the newest member of an old profession: anonymous exam scripts, the halo effect, reader variability, kappa and replicate pours all came first. Reliability against validity, and a single axis from no outside truth (wine quality) to measured truth (pitch calls) with LLM tasks placed on it.</div></div></div>
+  </section>
+
+  <section id="asking" class="amber">
+    <div class="arc-head"><span class="idx">ARC 1</span><h2>What are we asking?</h2></div>
+    <p class="arc-sub">Before measuring a judge, fix what it is told and how it is asked. After this arc you can write a policy a stranger would apply the same way, and pick between scoring, comparing and checking against a reference.</p>
+    <div class="row"><div class="num"><span class="check" data-p="p02"></span>02</div><div><div class="name"><a href="parts/p02.html">The policy: what good means</a></div><div class="meta"><span>rubrics &middot; anchors &middot; binary vs scales &middot; criteria drift</span></div><div class="desc">A judge is only as good as the written policy it applies. What a policy contains, why anchored and binary criteria beat vague scales, why people must read real outputs before anything is automated, and how disagreement gets fixed in the policy rather than in the judge.</div></div></div>
+    <div class="row"><div class="num"><span class="check" data-p="p03"></span>03</div><div><div class="name"><a href="parts/p03.html">Three ways to ask: score one, compare two, check against a reference</a></div><div class="meta"><span>pointwise &middot; pairwise &middot; reference-guided</span></div><div class="desc">Absolute scores and how judges use scales differently; pairwise preferences and how they become a ranking; reference answers and how they anchor. When to use which.</div></div></div>
+  </section>
+
+  <section id="measuring" class="cyan">
+    <div class="arc-head"><span class="idx">ARC 2</span><h2>Measuring the judge</h2></div>
+    <p class="arc-sub">Reliability, then validity. After this arc you can compute and read kappa, alpha, sensitivity, specificity, Youden's J and an ROC curve, and say what each one hides.</p>
+    <div class="row"><div class="num"><span class="check" data-p="p04"></span>04</div><div><div class="name"><a href="parts/p04.html">Do the judges agree?</a></div><div class="meta"><span>percent agreement &middot; Cohen's &kappa; &middot; Fleiss' &kappa; &middot; Krippendorff's &alpha;</span></div><div class="desc">Why 75% agreement can be a kappa of 0.49 and 92% a kappa of 0.29; three or more judges; confidence intervals; and the bar that matters: a judge should agree with people about as well as people agree with each other.</div></div></div>
+    <div class="row"><div class="num"><span class="check" data-p="p05"></span>05</div><div><div class="name"><a href="parts/p05.html">Judge versus truth: the confusion matrix, Youden's J and ROC</a></div><div class="meta"><span>sensitivity &middot; specificity &middot; J &middot; precision &middot; base rates &middot; ROC/AUC</span></div><div class="desc">The casebook judge at sensitivity 0.80 and specificity 0.85 (J = 0.65); why its precision falls from 0.70 to 0.22 when the thing it looks for gets rare; thresholds, the ROC curve and choosing a cut-off by cost.</div></div></div>
+  </section>
+
+  <section id="failing" class="cyan">
+    <div class="arc-head"><span class="idx">ARC 3</span><h2>How judges go wrong</h2></div>
+    <p class="arc-sub">The failure modes, each with its LLM form, its older human form and its fix. After this arc you can name the bias behind a suspicious score and the check that exposes it.</p>
+    <div class="row"><div class="num"><span class="check" data-p="p06"></span>06</div><div><div class="name"><a href="parts/p06.html">How judges go wrong I: what they are shown</a></div><div class="meta"><span>position &middot; order &middot; verbosity &middot; anchoring &middot; contrast</span></div><div class="desc">Biases from presentation: the answer shown first wins, longer looks better, a prior score anchors the next, and the last few decisions shape the next one.</div></div></div>
+    <div class="row"><div class="num"><span class="check" data-p="p07"></span>07</div><div><div class="name"><a href="parts/p07.html">How judges go wrong II: who is judging</a></div><div class="meta"><span>self-preference &middot; leniency &middot; halo &middot; drift &middot; Goodhart</span></div><div class="desc">Biases from the judge and its incentives: favouring its own kind, a shifted or squashed scale, one trait colouring the rest, fatigue and silent version changes, and what happens when people optimise against the judge.</div></div></div>
+  </section>
+
+  <section id="using" class="amber">
+    <div class="arc-head"><span class="idx">ARC 4</span><h2>Using a judge</h2></div>
+    <p class="arc-sub">From theory to a checklist. After this arc you can validate a judge on your own task, put error bars on it, and say when its grade should only be a flag.</p>
+    <div class="row"><div class="num"><span class="check" data-p="p08"></span>08</div><div><div class="name"><a href="parts/p08.html">Calibrating and validating a judge</a></div><div class="meta"><span>gold sets &middot; train/dev/test &middot; bias checks &middot; error bars &middot; routing &middot; audits</span></div><div class="desc">The practical loop: humans label first, measure their agreement, treat the judge as a classifier, run the bias checks, report intervals, route the uncertain middle to people, and keep auditing.</div></div></div>
+    <div class="row"><div class="num"><span class="check" data-p="p09"></span>09</div><div><div class="name"><a href="parts/p09.html">When not to trust a judge</a></div><div class="meta"><span>no agreement &middot; self-grading &middot; Goodhart &middot; rare events &middot; single items &middot; injection</span></div><div class="desc">The cases where a grade should not be used or should only start a second look, and the remedies older fields use: second opinions, panels, appeals and calibration committees.</div></div></div>
+  </section>
+
+  <section id="appendix" class="cyan">
+    <div class="arc-head"><span class="idx">APPENDIX</span><h2>The maths, worked</h2></div>
+    <p class="arc-sub">Every statistic on the site, derived and worked on the same casebook numbers.</p>
+    <div class="row"><div class="num"><span class="check" data-p="math"></span>A</div><div><div class="name"><a href="parts/math.html">Appendix: the maths, worked</a></div><div class="meta"><span>&kappa; &middot; Scott's &pi; &middot; Fleiss &middot; Krippendorff's &alpha; &middot; weighted &kappa; &middot; J &middot; Bayes &middot; ROC/AUC &middot; confidence intervals &middot; sample size</span></div><div class="desc">Formulas with the arithmetic shown: chance agreement, the coincidence matrix, Youden's J on the ROC, precision from prevalence, the trapezoid AUC and its Mann&ndash;Whitney reading, Wilson intervals and how many items a given error bar needs.</div></div></div>
+  </section>
+
+  <section id="refs">
+    <div class="arc-head"><span class="idx">SOURCES</span><h2>Where to start reading</h2></div>
+    <div class="links">
+      <a href="https://idvork.in/subjective-evals" target="_blank" rel="noopener"><b>Evals with no right answer: a recipe</b><span>Igor Dvorkin's nine-step loop: define a policy, calibrate the humans, build a stand-in, grade the grader. This course fills in steps 1, 2, 4 and 5.</span></a>
+      <a href="https://idvork.in/ai-testing#humans-dont-agree-either" target="_blank" rel="noopener"><b>Humans don't agree either</b><span>Igor's sourced list of how often expert people agree: peer review, mammograms, biopsies, summaries, preference labels.</span></a>
+      <a href="https://arxiv.org/abs/2306.05685" target="_blank" rel="noopener"><b>Zheng et al. 2023, Judging LLM-as-a-Judge</b><span>MT-Bench and Chatbot Arena; model judges measured against human experts; position, verbosity and self-enhancement bias.</span></a>
+      <a href="https://hamel.dev/blog/posts/llm-judge/" target="_blank" rel="noopener"><b>Hamel Husain on building an LLM judge</b><span>A practitioner's guide to writing critiques, labelling data and aligning a judge with a domain expert.</span></a>
+      <a href="https://doi.org/10.1177/001316446002000104" target="_blank" rel="noopener"><b>Cohen 1960, A coefficient of agreement for nominal scales</b><span>Where kappa comes from.</span></a>
+      <a href="https://doi.org/10.1002/1097-0142(1950)3:1%3C32::AID-CNCR2820030106%3E3.0.CO;2-3" target="_blank" rel="noopener"><b>Youden 1950, Index for rating diagnostic tests</b><span>Where J comes from.</span></a>
+    </div>
+  </section>
+
+  <section id="related">
+    <div class="arc-head"><span class="idx">RELATED</span><h2>Sibling maps</h2></div>
+    <div class="links">
+      <a href="https://idvorkin-ai-tools.github.io/harmbench-field-map/" target="_blank" rel="noopener"><b>HarmBench, mapped</b><span>A safety benchmark that grades model outputs with a trained classifier judge.</span></a>
+      <a href="https://idvorkin-ai-tools.github.io/" target="_blank" rel="noopener"><b>All the field maps</b><span>The index of explainer sites.</span></a>
+    </div>
+  </section>
+</main>
+<footer>
+  An original mini-course, compiled November 2026. Every example switches with the metaphor menu; the arithmetic never does. Sources are linked on each page; quotes are short and cited. Part of <a href="https://idvorkin-ai-tools.github.io/">the field maps</a>.
+</footer>
+<script>
+(function(){
+  var boxes = document.querySelectorAll('.check');
+  var key = 'llm-judges-map-read';
+  var state = {};
+  try { state = JSON.parse(localStorage.getItem(key) || '{}'); } catch(e) { state = {}; }
+  function save(){ try { localStorage.setItem(key, JSON.stringify(state)); } catch(e){} }
+  function paint(){
+    var done = 0;
+    boxes.forEach(function(b){
+      if (state[b.dataset.p]) { b.classList.add('on'); b.setAttribute('aria-pressed','true'); done++; }
+      else { b.classList.remove('on'); b.setAttribute('aria-pressed','false'); }
+    });
+    var el = document.getElementById('progress');
+    if (el) el.textContent = done === 0 ? 'Tick a unit when you have read it; this browser remembers.' : done + ' of ' + boxes.length + ' read.';
+  }
+  boxes.forEach(function(b){
+    b.setAttribute('role','button'); b.setAttribute('tabindex','0'); b.setAttribute('aria-label','Mark ' + b.dataset.p + ' as read');
+    b.addEventListener('click', function(e){ e.preventDefault(); state[b.dataset.p] = !state[b.dataset.p]; save(); paint(); });
+    b.addEventListener('keydown', function(e){ if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); b.click(); } });
+  });
+  paint();
+})();
+</script>
+</body>
+</html>

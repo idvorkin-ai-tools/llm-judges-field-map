@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Nothing here is new &mdash; LLM Judges, mapped</title>
+<meta name="description" content="Why an LLM judge is the newest member of an old profession: people have graded without an answer key for centuries, and they already met every problem this course covers." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="../paper.css" />
+<script src="../site.js"></script>
+</head>
+<body>
+<header class="bar"><div class="bar-in">
+  <div class="brand"><span class="dot"></span>LLM&nbsp;JUDGES&nbsp;//&nbsp;FIELD&nbsp;MAP</div>
+  <a class="back" href="../index.html#frame">&larr; the map</a>
+</div></header>
+<main>
+  <div class="eyebrow"><span class="box wb mono">THE FRAME &middot; UNIT 01 OF 09</span><span class="mono">why judges &middot; reliability and validity &middot; where truth comes from</span></div>
+  <h1>Nothing here is new</h1>
+  <div class="authors">An LLM judge is a rater. People have rated things without an answer key for as long as there have been exams, juries and tastings, and they have already met every problem in this course.</div>
+
+  <div class="tldr"><b>TL;DR &mdash;</b> An LLM judge reads an output and gives it a grade, usually because there is no answer key to check against and too many outputs for people to read. That makes it a measuring instrument, and every instrument has to answer two questions: do two readings of the same thing agree (reliability), and do the readings track what is really there (validity)? Hiring panels, managers, wine juries, radiologists and umpires have been answering those two questions for a century or more, with names and statistics this course borrows directly. The one thing to remember: before asking whether the model is a good judge, ask where the truth it is judged against comes from, because that varies by domain far more than the model does.</div>
+
+  <p class="lead">Like almost everything in machine learning, the LLM judge is an old idea in a new machine. The pipeline is new: a prompt, a rubric, a model call, a score. The problem is not. It is the problem of anyone asked to say whether something is good when no answer key exists, and the human institutions that do that job have spent a long time finding out how it breaks.</p>
+
+  <p>Pick a domain from the <b>Metaphor</b> menu at the top of the page. Every amber phrase and every boxed example on the site switches to that domain, while the LLM side of the explanation stays put. The domains are chosen because each one has a well-studied version of the judging problem, and each has its own idea of where truth comes from.</p>
+
+  <div class="mx case">
+    <div data-m="hire"><span class="mlabel">In the interview room</span><p>An interviewer spends an hour with a candidate and writes &ldquo;hire&rdquo; or &ldquo;no hire&rdquo;. No answer key exists for &ldquo;will this person do well here&rdquo;. The interviewer is the instrument, and the company finds out how good an instrument they were only a year later, and only for the people it hired.</p></div>
+    <div data-m="review"><span class="mlabel">In the review cycle</span><p>A manager reads six months of an employee's work and writes &ldquo;exceeds&rdquo; or &ldquo;meets&rdquo;. No answer key exists for that either. The manager is the instrument, and the calibration meeting where several managers compare ratings is how the organisation checks it.</p></div>
+    <div data-m="wine"><span class="mlabel">At the tasting table</span><p>A competition judge tastes a wine poured blind into a numbered glass and writes a score that decides whether it gets a medal. Nobody can look up whether the wine deserved one. The judge's palate is the instrument, and pouring the same wine twice in one flight is how a competition finds out whether the instrument is steady.</p></div>
+    <div data-m="med"><span class="mlabel">In the reading room</span><p>A radiologist reads a screening mammogram and decides whether to call the patient back. The image does not come labelled. The radiologist is the instrument, and medicine is the one domain here that can usually check it later: a biopsy, or a year of follow-up, says whether cancer was there.</p></div>
+    <div data-m="ump"><span class="mlabel">Behind the plate</span><p>An umpire watches a pitch the batter did not swing at and calls &ldquo;strike&rdquo; or &ldquo;ball&rdquo; in a fraction of a second. The rulebook defines the zone; the umpire's eyes are the instrument. Since pitch-tracking cameras arrived, every call can be checked against a measured position.</p></div>
+  </div>
+
+  <h2 id="why">Why anyone uses a judge</h2>
+  <p>A judge is what people reach for when checking against an answer key is impossible. Some tasks have one: arithmetic, a unit test, an exact-match label. Most of what people want from a language model does not. &ldquo;Was this summary faithful?&rdquo;, &ldquo;was this reply helpful and kind?&rdquo; and &ldquo;did the agent do what the user meant?&rdquo; are questions with better and worse answers but no single right one. Igor's <a href="https://idvork.in/subjective-evals#why-grading-is-hard" target="_blank" rel="noopener">evals recipe</a> puts the cost plainly: once the grader cannot be a function, it becomes a second source of noise, and the grade can move even when the output did not.</p>
+  <p>Three things push teams from human raters to a model. Volume: a prompt change can be tested on thousands of outputs, and nobody reads thousands of outputs twice a day. Speed: a model returns a grade in seconds, which turns evaluation into something that runs on every change rather than once a quarter. Cost: the work humans did per item drops to near zero. None of those three says anything about whether the grades are right. They say only that the judge is cheap enough to be tempting, which is why the rest of this course is about checking it.</p>
+  <p>The same trade has been made before. A hiring process that once relied on one founder's gut adds structured interviews when it has to hire hundreds of people. A wine competition with thousands of entries cannot have one famous palate taste them all, so it seats panels. Breast screening programmes read millions of images, so they write reporting standards and audit their readers. Each time, the move from one trusted expert to many cheaper judges forced the same questions this course asks of a model.</p>
+
+  <h2 id="history">They met every problem first</h2>
+  <p>Almost every failure listed in <a href="p06.html">units 06</a> and <a href="p07.html">07</a> was found, named and partly fixed by people judging people or things. A few examples, one per domain:</p>
+  <ul>
+    <li><b>Hiding who wrote it.</b> China's imperial examinations made scripts anonymous at the palace examination in 992, and later had clerks recopy every answer so that examiners could not recognise a candidate's handwriting (<a href="https://en.wikipedia.org/wiki/Imperial_examination" target="_blank" rel="noopener">Imperial examination</a>). That is a defence against the judge favouring a known author, which <a href="p07.html">unit 07</a> calls self-preference when the author is the judge's own model family.</li>
+    <li><b>One good trait colouring the rest.</b> In 1920 Edward Thorndike asked commanding officers to rate their soldiers on separate qualities, and found the ratings moved together far more than the qualities plausibly did. He called it a &ldquo;constant error&rdquo;; it is now called the halo effect (<a href="https://doi.org/10.1037/h0071663" target="_blank" rel="noopener">Thorndike 1920</a>).</li>
+    <li><b>Two readers, two answers.</b> In 1947 Jacob Yerushalmy studied how different readers of the same chest X-rays disagreed, and in doing so introduced the terms sensitivity and specificity (<a href="https://doi.org/10.2307/4586294" target="_blank" rel="noopener">Yerushalmy 1947</a>). Three years later W. J. Youden proposed a single index for rating a diagnostic test, the J statistic in <a href="p05.html">unit 05</a> (<a href="https://doi.org/10.1002/1097-0142(1950)3:1%3C32::AID-CNCR2820030106%3E3.0.CO;2-3" target="_blank" rel="noopener">Youden 1950</a>).</li>
+    <li><b>Agreement beyond chance.</b> Jacob Cohen published kappa in 1960 because psychologists coding the same behaviour needed to know how much of their agreement was luck (<a href="https://doi.org/10.1177/001316446002000104" target="_blank" rel="noopener">Cohen 1960</a>). <a href="p04.html">Unit 04</a> uses it unchanged.</li>
+    <li><b>The same wine, a different score.</b> Robert Hodgson had the California State Fair pour some wines three times within a judge's flight, and measured how often a judge gave the same wine the same score (<a href="https://doi.org/10.1017/s1931436100001152" target="_blank" rel="noopener">Hodgson 2008</a>). That is the self-consistency check any LLM judge should get.</li>
+    <li><b>Checking the call against a machine.</b> Tennis has let players challenge line calls against Hawk-Eye ball tracking since 2006 (<a href="https://en.wikipedia.org/wiki/Hawk-Eye" target="_blank" rel="noopener">Hawk-Eye</a>), and economists have used baseball's pitch tracking to measure umpire bias call by call (<a href="https://doi.org/10.1257/aer.101.4.1410" target="_blank" rel="noopener">Parsons et al. 2011</a>).</li>
+  </ul>
+  <p>The model-era literature knows this. The paper that made &ldquo;LLM-as-a-judge&rdquo; a standard term, <a href="https://arxiv.org/abs/2306.05685" target="_blank" rel="noopener">Zheng et al. 2023</a>, measured its judges the way the older fields measure people: how often the model agrees with human experts compared with how often the experts agree with each other, and which systematic biases (position, length, self-preference) push its verdicts around. What follows treats it the same way.</p>
+
+  <h2 id="instrument">A judge is an instrument</h2>
+  <figure class="fig"><button type="button" class="media" aria-label="Enlarge figure: four targets showing the combinations of reliability and validity. Top left: shots tightly grouped on the bullseye, reliable and valid. Top right: shots tightly grouped away from the centre, reliable but biased. Bottom left: shots scattered around the centre, valid on average but noisy. Bottom right: shots scattered away from the centre, neither."><svg class="dg" viewBox="0 0 400 330" role="img" aria-label="Four targets showing the combinations of reliability and validity. Top left: shots tightly grouped on the bullseye, reliable and valid. Top right: shots tightly grouped away from the centre, reliable but biased. Bottom left: shots scattered around the centre, valid on average but noisy. Bottom right: shots scattered away from the centre, neither."><title>Four targets: reliable and valid; reliable but biased; noisy but centred; neither.</title>
+    <g><circle cx="100" cy="88" r="58" class="box"/><circle cx="100" cy="88" r="38" class="box"/><circle cx="100" cy="88" r="16" class="box-def"/>
+      <circle cx="96" cy="85" r="4" fill="var(--off)"/><circle cx="104" cy="90" r="4" fill="var(--off)"/><circle cx="99" cy="94" r="4" fill="var(--off)"/><circle cx="103" cy="83" r="4" fill="var(--off)"/><circle cx="94" cy="91" r="4" fill="var(--off)"/>
+      <text x="100" y="166" class="t-ok" font-size="11.5" text-anchor="middle" font-weight="600">reliable + valid</text></g>
+    <g><circle cx="300" cy="88" r="58" class="box"/><circle cx="300" cy="88" r="38" class="box"/><circle cx="300" cy="88" r="16" class="box-def"/>
+      <circle cx="325" cy="62" r="4" fill="var(--off)"/><circle cx="332" cy="67" r="4" fill="var(--off)"/><circle cx="327" cy="70" r="4" fill="var(--off)"/><circle cx="334" cy="60" r="4" fill="var(--off)"/><circle cx="321" cy="66" r="4" fill="var(--off)"/>
+      <text x="300" y="166" class="t-off" font-size="11.5" text-anchor="middle" font-weight="600">reliable, biased</text></g>
+    <g><circle cx="100" cy="240" r="58" class="box"/><circle cx="100" cy="240" r="38" class="box"/><circle cx="100" cy="240" r="16" class="box-def"/>
+      <circle cx="70" cy="222" r="4" fill="var(--off)"/><circle cx="128" cy="230" r="4" fill="var(--off)"/><circle cx="96" cy="276" r="4" fill="var(--off)"/><circle cx="112" cy="206" r="4" fill="var(--off)"/><circle cx="82" cy="262" r="4" fill="var(--off)"/>
+      <text x="100" y="318" class="t-def" font-size="11.5" text-anchor="middle" font-weight="600">centred, noisy</text></g>
+    <g><circle cx="300" cy="240" r="58" class="box"/><circle cx="300" cy="240" r="38" class="box"/><circle cx="300" cy="240" r="16" class="box-def"/>
+      <circle cx="322" cy="200" r="4" fill="var(--off)"/><circle cx="345" cy="232" r="4" fill="var(--off)"/><circle cx="268" cy="207" r="4" fill="var(--off)"/><circle cx="336" cy="210" r="4" fill="var(--off)"/><circle cx="350" cy="252" r="4" fill="var(--off)"/>
+      <text x="300" y="318" class="t-crit" font-size="11.5" text-anchor="middle" font-weight="600">neither</text></g>
+  </svg></button><figcaption>The bullseye is the truth; each dot is one grading of the same item. Reliability is how tight the dots are, validity is whether they sit on the centre. <span class="mx"><span data-m="hire">A tight cluster off-centre is the interviewer who reliably prefers confident talkers.</span><span data-m="review">A tight cluster off-centre is the manager who rates everyone one notch high, every cycle.</span><span data-m="wine">A tight cluster off-centre is the judge who reliably over-scores big, oaky wines.</span><span data-m="med">A tight cluster off-centre is the reader who consistently calls back too many patients.</span><span data-m="ump">A tight cluster off-centre is the umpire whose zone is reliably a ball's width too wide.</span></span></figcaption></figure>
+  <p>Treat the judge as a measuring device and two separate questions fall out. <strong>Reliability</strong>: if the same item is graded twice, by the same judge or by two judges, do the grades agree? <strong>Validity</strong>: do the grades track the property they claim to measure? The four targets show why the two must be checked separately. A judge can be perfectly consistent and consistently wrong, and a judge can be right on average while any single grade is close to a coin flip.</p>
+  <p>The two questions map onto the middle of this course. <a href="p04.html">Unit 04</a> measures reliability: how often judges agree, and how much of that agreement chance alone would produce. <a href="p05.html">Unit 05</a> measures validity, by comparing the judge to whatever stands in for the truth. Most practical trouble with LLM judges is a reliability number reported as if it were a validity number: &ldquo;the judge agrees with GPT-whatever 90% of the time&rdquo; says the two are consistent with each other, and nothing about whether either is right.</p>
+  <p>Reliability caps validity. A judge whose grade for the same item wanders from one reading to the next cannot track the truth any better than it tracks itself. That is why every serious evaluation starts with the cheapest reliability check there is: grade the same items twice and count how often the verdict changes.</p>
+
+  <h2 id="truth">Where truth comes from</h2>
+  <figure class="fig wide"><button type="button" class="media" aria-label="Enlarge figure: a horizontal axis running from no outside truth on the left to measured truth on the right. Wine quality and performance ratings sit at the far left, hiring outcomes a little to the right, mammogram reading near the right, and pitch calls at the far right. Below the axis, LLM tasks are placed on the same scale: tone and helpfulness on the left, summary faithfulness in the middle, maths answers and code that must pass tests on the right."><svg class="dg" viewBox="0 0 720 230" role="img" aria-label="An axis from no outside truth to measured truth. Wine quality and performance ratings at the left, hiring outcomes left of centre, mammograms right of centre, pitch calls at the right. LLM tasks below: tone and helpfulness left, faithfulness centre, maths and tested code right."><title>How much outside truth each domain has, with LLM tasks placed on the same axis.</title>
+    <text x="30" y="22" class="t-dim" font-size="11" text-anchor="start">NO OUTSIDE TRUTH</text>
+    <text x="690" y="22" class="t-dim" font-size="11" text-anchor="end">MEASURED TRUTH</text>
+    <line x1="30" y1="110" x2="690" y2="110" class="ln"/><polygon class="ah" points="696,110 686,105 686,115"/>
+    <circle cx="70" cy="110" r="6" fill="var(--off)"/><text x="70" y="90" class="t-ink" font-size="11.5" text-anchor="middle">wine quality</text><text x="70" y="74" class="t-dim" font-size="10.5" text-anchor="middle">panels only</text>
+    <circle cx="170" cy="110" r="6" fill="var(--off)"/><text x="170" y="58" class="t-ink" font-size="11.5" text-anchor="middle">performance</text><text x="170" y="42" class="t-dim" font-size="10.5" text-anchor="middle">committees only</text><line x1="170" y1="64" x2="170" y2="102" class="ln"/>
+    <circle cx="300" cy="110" r="6" fill="var(--off)"/><text x="300" y="90" class="t-ink" font-size="11.5" text-anchor="middle">hiring</text><text x="300" y="74" class="t-dim" font-size="10.5" text-anchor="middle">late, hires only</text>
+    <circle cx="500" cy="110" r="6" fill="var(--off)"/><text x="500" y="90" class="t-ink" font-size="11.5" text-anchor="middle">mammogram</text><text x="500" y="74" class="t-dim" font-size="10.5" text-anchor="middle">biopsy, follow-up</text>
+    <circle cx="640" cy="110" r="6" fill="var(--off)"/><text x="640" y="90" class="t-ink" font-size="11.5" text-anchor="middle">pitch call</text><text x="640" y="74" class="t-dim" font-size="10.5" text-anchor="middle">camera tracking</text>
+    <g class="mx">
+      <circle data-m="hire" cx="300" cy="110" r="13" fill="none" stroke="var(--off-bright)" stroke-width="2"/>
+      <circle data-m="review" cx="170" cy="110" r="13" fill="none" stroke="var(--off-bright)" stroke-width="2"/>
+      <circle data-m="wine" cx="70" cy="110" r="13" fill="none" stroke="var(--off-bright)" stroke-width="2"/>
+      <circle data-m="med" cx="500" cy="110" r="13" fill="none" stroke="var(--off-bright)" stroke-width="2"/>
+      <circle data-m="ump" cx="640" cy="110" r="13" fill="none" stroke="var(--off-bright)" stroke-width="2"/>
+    </g>
+    <text x="30" y="150" class="t-def" font-size="10.5" text-anchor="start">LLM TASKS ON THE SAME AXIS</text>
+    <rect x="40" y="162" width="200" height="34" rx="6" class="box-def"/><text x="140" y="184" class="t-ink" font-size="11.5" text-anchor="middle">tone, helpfulness</text>
+    <rect x="260" y="162" width="200" height="34" rx="6" class="box-def"/><text x="360" y="184" class="t-ink" font-size="11.5" text-anchor="middle">faithful to the source?</text>
+    <rect x="480" y="162" width="200" height="34" rx="6" class="box-def"/><text x="580" y="184" class="t-ink" font-size="11.5" text-anchor="middle">maths answer, tested code</text>
+    <text x="360" y="220" class="t-dim" font-size="10.5" text-anchor="middle">further right: less need for a judge, and an easier one to check</text>
+  </svg></button><figcaption>Placement is this map's judgement, not a measurement. The ring marks the domain chosen in the menu. The further left a task sits, the more the judge's grade is the only definition of good there is.</figcaption></figure>
+  <p>The five domains differ less in how their judges fail than in what the judges can be checked against. That difference sets how far anyone can trust a judge, so it is worth fixing early.</p>
+  <div class="mx case">
+    <div data-m="hire"><span class="mlabel">Truth in hiring</span><p>Hiring has a truth, but it arrives late and only for some people: how a hire performs over the following year. Candidates who were rejected never generate an outcome, so the judge's &ldquo;no hire&rdquo; calls can never be checked. Industrial psychologists have long measured interview methods this way, by correlating ratings with later job performance (<a href="https://doi.org/10.1037/0033-2909.124.2.262" target="_blank" rel="noopener">Schmidt and Hunter 1998</a>), and that correlation is itself built on a manager's rating.</p></div>
+    <div data-m="review"><span class="mlabel">Truth in performance reviews</span><p>Performance reviews have almost no outside truth. The rating is the measurement; there is nothing further down to check it against except other people's ratings. That is why the review world leans so hard on calibration meetings: when no answer key exists, agreement among informed judges is the best stand-in available.</p></div>
+    <div data-m="wine"><span class="mlabel">Truth in wine judging</span><p>Wine has no outside truth about quality at all. A lab can confirm a fault such as cork taint, but nothing confirms that a wine deserved gold. Competitions can only test judges against each other and against themselves, which is why the replicate-pour studies matter so much in this domain.</p></div>
+    <div data-m="med"><span class="mlabel">Truth in medicine</span><p>Medicine is the domain with the strongest reference standard: biopsy for the women who are called back, and later diagnosis or a clean year of follow-up for the women who are not. It is still imperfect, because the reference has its own error and not every case gets the same check. Diagnostic-test statistics were born here for that reason.</p></div>
+    <div data-m="ump"><span class="mlabel">Truth behind the plate</span><p>Umpiring now has a measured truth. A camera system records where every pitch crossed the plate, and the strike zone is defined in the rulebook, so each call can be scored right or wrong after the game. The judge is still human because the call has to be made live and the system's own error is small but not zero.</p></div>
+  </div>
+  <p>LLM tasks spread along the same axis. Where there is a checkable answer, use it: code that passes tests needs no judge. Where the property is faithfulness to a source, a careful human can usually settle it, so the judge can be checked against people the way a radiologist is checked against biopsy. Where the property is tone, helpfulness or taste, the task sits at the wine end. The only available truth is the judgement of people who have agreed on a policy, which is why <a href="p02.html">unit 02</a> starts with writing that policy down.</p>
+
+  <h2 id="course">How the course is laid out</h2>
+  <table class="kv">
+    <tr><th>Unit</th><th>The question</th><th>The older field that answered it first</th></tr>
+    <tr><td><a href="p02.html">02</a></td><td>What does good mean, written down?</td><td>Structured interview scorecards, rating scales with anchors, BI-RADS reporting categories, the rulebook</td></tr>
+    <tr><td><a href="p03.html">03</a></td><td>Score one, compare two, or check against a reference?</td><td>Absolute ratings versus ranking; side-by-side tasting; reading against a prior image</td></tr>
+    <tr><td><a href="p04.html">04</a></td><td>Do judges agree, beyond chance?</td><td>Psychology and content analysis (Cohen, Fleiss, Krippendorff)</td></tr>
+    <tr><td><a href="p05.html">05</a></td><td>Does the judge track the truth?</td><td>Diagnostic medicine (Yerushalmy, Youden, ROC analysis)</td></tr>
+    <tr><td><a href="p06.html">06</a>&ndash;<a href="p07.html">07</a></td><td>How do judges go wrong?</td><td>Rater-error research, wine order effects, umpire bias studies</td></tr>
+    <tr><td><a href="p08.html">08</a></td><td>How do I validate a judge in practice?</td><td>Calibration meetings, reader audits, replicate pours</td></tr>
+    <tr><td><a href="p09.html">09</a></td><td>When should I not trust one?</td><td>Every field's list of cases that go to a second opinion</td></tr>
+  </table>
+  <p>The <a href="math.html">maths appendix</a> works every statistic on one shared set of numbers. The same numbers appear in every domain, so switching the metaphor changes the story and never the arithmetic.</p>
+
+  <div class="callout"><b>Carry this away.</b> An LLM judge is a rater, and the oldest rater questions apply to it unchanged: does it agree with itself, does it agree with other judges, and does it agree with the truth, wherever that comes from? Ask the third question last, because its answer depends on a source of truth that many tasks do not have.</div>
+
+  <h2 id="can-say">What you can say now</h2>
+  <ul>
+    <li>An LLM judge is used where no answer key exists and the volume is too high for people; cheapness is the reason to use one, not evidence that it works.</li>
+    <li>Reliability (agreeing with itself and with other judges) and validity (agreeing with the truth) are separate checks, and reliability caps validity.</li>
+    <li>Anonymous scripts, halo error, reader variability, kappa, Youden's J and replicate pours all predate language models by decades or centuries; this course borrows them as they are.</li>
+    <li>Domains differ most in where truth comes from: measured for pitch calls, biopsy for mammograms, late and partial for hiring, and nothing beyond other judges for wine quality and performance ratings. LLM tasks spread along the same range.</li>
+  </ul>
+
+  <h2 id="sources">Sources</h2>
+  <ul class="readings">
+    <li><a href="https://arxiv.org/abs/2306.05685" target="_blank" rel="noopener">Zheng et al. 2023, Judging LLM-as-a-Judge with MT-Bench and Chatbot Arena</a> &middot; the paper that measured model judges against expert and crowd agreement.</li>
+    <li><a href="https://doi.org/10.1037/h0071663" target="_blank" rel="noopener">Thorndike 1920, A constant error in psychological ratings</a> &middot; the halo effect in officers' ratings.</li>
+    <li><a href="https://doi.org/10.2307/4586294" target="_blank" rel="noopener">Yerushalmy 1947, Statistical problems in assessing methods of medical diagnosis</a> &middot; reader variability on X-rays; sensitivity and specificity.</li>
+    <li><a href="https://doi.org/10.1002/1097-0142(1950)3:1%3C32::AID-CNCR2820030106%3E3.0.CO;2-3" target="_blank" rel="noopener">Youden 1950, Index for rating diagnostic tests</a> &middot; the J statistic.</li>
+    <li><a href="https://doi.org/10.1177/001316446002000104" target="_blank" rel="noopener">Cohen 1960, A coefficient of agreement for nominal scales</a> &middot; kappa.</li>
+    <li><a href="https://doi.org/10.1017/s1931436100001152" target="_blank" rel="noopener">Hodgson 2008, An examination of judge reliability at a major U.S. wine competition</a> &middot; replicate pours at the California State Fair.</li>
+    <li><a href="https://doi.org/10.1257/aer.101.4.1410" target="_blank" rel="noopener">Parsons, Sulaeman, Yates and Hamermesh 2011, Strike Three</a> &middot; umpire calls measured against pitch tracking.</li>
+    <li><a href="https://doi.org/10.1037/0033-2909.124.2.262" target="_blank" rel="noopener">Schmidt and Hunter 1998, The validity and utility of selection methods</a> &middot; how hiring methods are validated against later performance.</li>
+    <li><a href="https://en.wikipedia.org/wiki/Imperial_examination" target="_blank" rel="noopener">Imperial examination (Wikipedia)</a> &middot; anonymous scripts and recopying.</li>
+    <li><a href="https://idvork.in/subjective-evals" target="_blank" rel="noopener">Igor Dvorkin, Evals with no right answer: a recipe</a> &middot; the nine-step loop this course fills in.</li>
+  </ul>
+
+  <div class="callout">Next: <a class="lnk" href="p02.html">The policy: what good means</a> &middot; Back to <a class="lnk" href="../index.html#frame">the map</a>.</div>
+</main>
+<footer>Original explanation, compiled November 2026. Every example switches with the metaphor menu; the arithmetic never does. Part of <a href="../index.html">LLM Judges, mapped</a>.</footer>
+<script src="../fig.js" defer></script>
+</body>
+</html>
