@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Calibrating and validating a judge &mdash; LLM Judges, mapped</title>
+<meta name="description" content="A seven-step checklist for validating an LLM judge: write the policy, measure human agreement, treat the judge as a classifier, run the bias checks, put error bars on everything, route the uncertain middle to people, and keep auditing." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="../paper.css" />
+<script src="../site.js"></script>
+</head>
+<body>
+<header class="bar"><div class="bar-in">
+  <div class="brand"><span class="dot"></span>LLM&nbsp;JUDGES&nbsp;//&nbsp;FIELD&nbsp;MAP</div>
+  <a class="back" href="../index.html#using">&larr; the map</a>
+</div></header>
+<main>
+  <div class="eyebrow"><span class="box wb mono">USING A JUDGE &middot; UNIT 08 OF 09</span><span class="mono">gold sets &middot; held-out tests &middot; bias checks &middot; error bars &middot; routing &middot; audits</span></div>
+  <h1>Calibrating and validating a judge</h1>
+  <div class="authors">A checklist you could run tomorrow. Every step is something hiring panels, review committees, wine shows, breast screening programmes and umpire supervisors already do to their human judges.</div>
+
+  <div class="tldr"><b>TL;DR &mdash;</b> Validating an LLM judge is the same job as qualifying a new human judge. Write the policy and have people label real outputs before any automation. Measure how often those people agree with each other, because that is the bar the judge has to reach. Then treat the judge as a classifier: tune it on one slice of the labels, test it once on another, and report how it does on YES items and NO items separately. Swap positions, re-run the same items and pair long against short answers to catch the known biases. Put an error bar on every number, and expect it to be wide at 100&ndash;200 items. Let the judge settle the clear cases and send the uncertain middle to people. Then keep auditing, because the judge, the prompt and the traffic all drift.</div>
+
+  <p class="lead">Units 04 to 07 gave the measurements and the failure modes. This unit puts them in order. The order matters more than any single step: most broken judges were validated, just in the wrong order, against labels nobody checked, on the same items the prompt was tuned on.</p>
+
+  <figure class="fig wide"><button type="button" class="media" aria-label="Enlarge figure: the validation pipeline as seven boxes from left to right. One, write the policy. Two, humans label real outputs and their agreement is measured on a gold set. Three, the gold set is split into train, dev and test, and the judge is tuned on dev and scored once on test. Four, bias checks. Five, error bars. Six, deploy with confidence routing. Seven, audit, with an arrow looping back to the policy and the gold set."><svg class="dg" viewBox="0 0 720 300" role="img" aria-label="The validation pipeline: policy, human labels and agreement, train/dev/test split, bias checks, error bars, routed deployment, and an audit loop back to the start."><title>The seven-step validation pipeline with an audit loop.</title>
+    <rect x="10" y="40" width="92" height="64" rx="7" class="box-def"/>
+    <text x="56" y="62" class="t-def" font-size="10.5" text-anchor="middle" font-weight="600">1 POLICY</text>
+    <g class="mx">
+      <text data-m="hire" x="56" y="84" class="t-ink" font-size="10" text-anchor="middle">scorecard</text>
+      <text data-m="review" x="56" y="84" class="t-ink" font-size="10" text-anchor="middle">rating defs</text>
+      <text data-m="wine" x="56" y="84" class="t-ink" font-size="10" text-anchor="middle">scoring sheet</text>
+      <text data-m="med" x="56" y="84" class="t-ink" font-size="10" text-anchor="middle">BI-RADS</text>
+      <text data-m="ump" x="56" y="84" class="t-ink" font-size="10" text-anchor="middle">rulebook zone</text>
+    </g>
+    <line x1="102" y1="72" x2="114" y2="72" class="ln"/><polygon class="ah" points="120,72 112,68 112,76"/>
+    <rect x="120" y="40" width="98" height="64" rx="7" class="box-def"/>
+    <text x="169" y="62" class="t-def" font-size="10.5" text-anchor="middle" font-weight="600">2 HUMANS</text>
+    <g class="mx">
+      <text data-m="hire" x="169" y="80" class="t-ink" font-size="11" text-anchor="middle">interviewers</text>
+      <text data-m="review" x="169" y="80" class="t-ink" font-size="11" text-anchor="middle">managers</text>
+      <text data-m="wine" x="169" y="80" class="t-ink" font-size="11" text-anchor="middle">judges</text>
+      <text data-m="med" x="169" y="80" class="t-ink" font-size="11" text-anchor="middle">radiologists</text>
+      <text data-m="ump" x="169" y="80" class="t-ink" font-size="11" text-anchor="middle">umpires</text>
+    </g>
+    <text x="169" y="96" class="t-dim" font-size="10" text-anchor="middle">agree = bar</text>
+    <line x1="218" y1="72" x2="230" y2="72" class="ln"/><polygon class="ah" points="236,72 228,68 228,76"/>
+    <rect x="236" y="40" width="112" height="64" rx="7" class="box-off"/>
+    <text x="292" y="62" class="t-off" font-size="10.5" text-anchor="middle" font-weight="600">3 SPLIT + TUNE</text>
+    <text x="292" y="80" class="t-ink" font-size="10.5" text-anchor="middle">train/dev/test</text>
+    <text x="292" y="96" class="t-dim" font-size="10" text-anchor="middle">test: run once</text>
+    <line x1="348" y1="72" x2="360" y2="72" class="ln"/><polygon class="ah" points="366,72 358,68 358,76"/>
+    <rect x="366" y="40" width="98" height="64" rx="7" class="box-off"/>
+    <text x="415" y="62" class="t-off" font-size="10.5" text-anchor="middle" font-weight="600">4 BIAS CHECKS</text>
+    <text x="415" y="80" class="t-ink" font-size="10.5" text-anchor="middle">swap, re-run</text>
+    <text x="415" y="96" class="t-dim" font-size="10" text-anchor="middle">long vs short</text>
+    <line x1="464" y1="72" x2="476" y2="72" class="ln"/><polygon class="ah" points="482,72 474,68 474,76"/>
+    <rect x="482" y="40" width="98" height="64" rx="7" class="box-off"/>
+    <text x="531" y="62" class="t-off" font-size="10.5" text-anchor="middle" font-weight="600">5 ERROR BARS</text>
+    <text x="531" y="80" class="t-ink" font-size="10.5" text-anchor="middle">sens±  spec±</text>
+    <text x="531" y="96" class="t-dim" font-size="10" text-anchor="middle">κ ±</text>
+    <line x1="580" y1="72" x2="592" y2="72" class="ln"/><polygon class="ah" points="598,72 590,68 590,76"/>
+    <rect x="598" y="40" width="112" height="64" rx="7" class="box-ok"/>
+    <text x="654" y="62" class="t-ok" font-size="10.5" text-anchor="middle" font-weight="600">6 DEPLOY</text>
+    <text x="654" y="80" class="t-ink" font-size="11" text-anchor="middle">clear: judge</text>
+    <g class="mx">
+      <text data-m="hire" x="654" y="96" class="t-dim" font-size="10" text-anchor="middle">→ committee</text>
+      <text data-m="review" x="654" y="96" class="t-dim" font-size="10" text-anchor="middle">→ calib mtg</text>
+      <text data-m="wine" x="654" y="96" class="t-dim" font-size="10" text-anchor="middle">→ panel talk</text>
+      <text data-m="med" x="654" y="96" class="t-dim" font-size="10" text-anchor="middle">→ 2nd reader</text>
+      <text data-m="ump" x="654" y="96" class="t-dim" font-size="10" text-anchor="middle">→ challenge</text>
+    </g>
+    <line x1="654" y1="104" x2="654" y2="160" class="ln-def"/><polygon class="ah-def" points="654,166 650,158 658,158"/>
+    <rect x="470" y="166" width="240" height="64" rx="7" class="box-crit"/>
+    <text x="590" y="188" class="t-crit" font-size="10.5" text-anchor="middle" font-weight="600">7 AUDIT, FOREVER</text>
+    <text x="590" y="206" class="t-ink" font-size="11" text-anchor="middle">re-label a sample · drift alarms</text>
+    <g class="mx">
+      <text data-m="hire" x="590" y="222" class="t-dim" font-size="10" text-anchor="middle">1-yr outcome</text>
+      <text data-m="review" x="590" y="222" class="t-dim" font-size="10" text-anchor="middle">committee</text>
+      <text data-m="wine" x="590" y="222" class="t-dim" font-size="10" text-anchor="middle">ref panel</text>
+      <text data-m="med" x="590" y="222" class="t-dim" font-size="10" text-anchor="middle">biopsy</text>
+      <text data-m="ump" x="590" y="222" class="t-dim" font-size="10" text-anchor="middle">pitch tracking</text>
+    </g>
+    <path d="M470,198 L60,198 L60,110" fill="none" class="ln-crit"/><polygon class="ah-crit" points="60,104 56,112 64,112"/>
+    <text x="260" y="190" class="t-dim" font-size="10.5" text-anchor="middle">model, prompt or traffic changed → back to 1–3</text>
+    <rect x="10" y="250" width="700" height="34" rx="7" class="box"/>
+    <text x="360" y="272" class="t-dim" font-size="11" text-anchor="middle">Steps 1–2 are people. Steps 3–5 grade the grader. Steps 6–7 keep people in the loop after launch.</text>
+  </svg></button><figcaption>The whole page on one diagram. The domain labels inside the boxes switch with the metaphor menu. The red loop is the part teams skip: any change to the judge's model or prompt, or to the traffic, sends you back to the gold set.</figcaption></figure>
+
+  <h2 id="policy-first">1. Write the policy, then have people label real outputs</h2>
+  <p>The first artefact is not a judge prompt. It is the policy: a short list of criteria, how each one is scored, and enough worked examples that a stranger would score the same way. Igor's recipe makes this <a href="https://idvork.in/subjective-evals#1-define-a-policy-aka-use-experts-to-decide-what-good-means" target="_blank" rel="noopener">step one</a> and is blunt about the order: set up human review before any automation, because everything after it gets checked against it. <a href="p02.html">Unit 02</a> covers how to write the policy itself.</p>
+  <p>Then people label real outputs, not invented ones. Read 50 to 100 of them, write down in plain words why each failing one fails, and only then group the notes into criteria. That is how Igor runs it in <a href="https://idvork.in/ai-testing#humans-dont-agree-either" target="_blank" rel="noopener">AI testing</a>, and it is also <a href="https://hamel.dev/blog/posts/llm-judge/" target="_blank" rel="noopener">Hamel Husain's</a> starting point: one principal domain expert makes a binary pass/fail call on each item and writes a critique explaining it. The critiques later become the judge's few-shot examples, so they need to be detailed enough for a new hire to follow.</p>
+  <p>Expect the policy to change while you label. Shankar and colleagues named this when they built EvalGen, a tool that asks people to grade a sample of outputs and uses those grades to pick the candidate evaluators that agree with them:</p>
+  <blockquote class="q">users need criteria to grade outputs, but grading outputs helps users define criteria.<span class="cite">&mdash; <a href="https://arxiv.org/abs/2404.12272" target="_blank" rel="noopener">Shankar et al. 2024, Who Validates the Validators?</a>, on &ldquo;criteria drift&rdquo;</span></blockquote>
+  <p>So the labels from the first pass are drafts. Re-label the early items once the policy settles, or the gold set will hold two different policies at once.</p>
+  <div class="mx case">
+    <div data-m="hire"><span class="mlabel">Hiring: the scorecard before the interviews</span><p>A structured interview loop writes the scorecard first: the questions, and anchored example answers for a strong, middling and weak response. New interviewers then practise on mock interviews or recorded ones and compare their scores with the anchors. Nobody lets a new interviewer's &ldquo;hire&rdquo; count until the scorecard exists and they have used it.</p></div>
+    <div data-m="review"><span class="mlabel">Reviews: definitions and exemplar packets</span><p>A review process writes down what &ldquo;exceeds&rdquo; and &ldquo;meets&rdquo; mean at each level, then collects exemplar packets: real, anonymised half-years of work that a committee agreed sit at each rating. Managers read the exemplars before rating their own employees, the same way the judge prompt carries few-shot critiques.</p></div>
+    <div data-m="wine"><span class="mlabel">Wine: the scoring sheet and palate alignment</span><p>A wine show fixes its scoring sheet before the first glass. Australia's Advanced Wine Assessment Course, which prepares would-be show judges, opens with fault and taint training and then &ldquo;palate alignment brackets&rdquo;, where participants score wines and compare their scores with those of guest judges (<a href="https://www.awri.com.au/wp-content/uploads/2023/02/01-AWAC-Course-Notes-28092022-1.pdf" target="_blank" rel="noopener">AWAC course notes</a>). That is the policy and the first labelling pass, done with wine.</p></div>
+    <div data-m="med"><span class="mlabel">Medicine: the reporting categories come first</span><p>Breast imaging fixed its vocabulary before it audited anyone: <a href="https://en.wikipedia.org/wiki/BI-RADS" target="_blank" rel="noopener">BI-RADS</a> assessment categories say exactly what each verdict means and what happens next. A radiologist's &ldquo;recall&rdquo; can be audited only because everyone means the same thing by it.</p></div>
+    <div data-m="ump"><span class="mlabel">Umpires: the zone is written down</span><p>The rulebook defines the strike zone in words before any umpire calls a pitch. Umpiring is the easy case here: the policy is short and precise, which is exactly why a machine can measure every call against it.</p></div>
+  </div>
+
+  <h2 id="human-bar">2. Measure human agreement on a gold set: that is the bar</h2>
+  <p>Before asking whether the judge is good, ask how often two careful people agree. Have at least two labellers grade the same items independently, without discussing them, and compute agreement with chance removed (<a href="p04.html">unit 04</a>). Where they split, rewrite the policy and label again until the number stops rising (<a href="https://idvork.in/subjective-evals#2-make-sure-humans-can-apply-the-policy-consistently" target="_blank" rel="noopener">Igor's step 2</a>). The items both people agree on, plus the splits resolved by discussion, become the <strong>gold set</strong>.</p>
+  <p>The number you end with is the bar. In the casebook, <span class="mx"><span data-m="hire">interviewers Ana and Ben</span><span data-m="review">managers Carla and Dev</span><span data-m="wine">judges Elodie and Femi</span><span data-m="med">Dr Gale and Dr Hart</span><span data-m="ump">umpires Ivo and June</span></span> label 100 items and agree on 75, which is Cohen's kappa 0.49 once chance is removed. A judge that agrees with either of them about as well as they agree with each other has reached the human level on this task; asking for much more is asking the judge to know something neither person knows. Igor's post states the rule: trust a judge when it agrees with humans about as well as humans agree with each other, <em>measured the same way on the same items</em>.</p>
+  <p>That last clause matters. The casebook judge in <a href="p05.html">unit 05</a> agrees with the gold labels on 83.5% of items, a kappa of about 0.62 in the casebook numbers, which is higher than the 0.49 between two single raters, and that is not a contradiction: a gold label that two people agreed on, or argued to a consensus, is less noisy than either person alone. Compare like with like. Judge-versus-Ana goes next to Ben-versus-Ana; judge-versus-gold goes next to a third human scored against the same gold.</p>
+  <div class="mx case">
+    <div data-m="hire"><span class="mlabel">Hiring: shadowing and calibration</span><p>Interviewer training usually runs through shadowing: the new interviewer sits in on a loop, scores the candidate privately, and compares with the experienced interviewer afterwards; then they swap roles. Where the two keep splitting, the scorecard's anchors are rewritten. Ana and Ben's 75% is the number a hiring team would get if it ever had both score the same candidates blind.</p></div>
+    <div data-m="review"><span class="mlabel">Reviews: the calibration meeting</span><p>The calibration meeting is this step done in a room. Several managers bring proposed ratings, defend them, and the group moves the ones nobody else would give. Carla and Dev rating the same ten packets before the meeting, without talking, would give the agreement number; the meeting's output is the gold label.</p></div>
+    <div data-m="wine"><span class="mlabel">Wine: the panel and its splits</span><p>Show panels score each glass independently and only then compare. Elodie and Femi agreeing on 75 of 100 wines is the panel's reliability; the glasses they split on are the ones the panel discusses. With no outside truth about quality, the panel's agreed score is the gold label: a reference panel, not an outside truth.</p></div>
+    <div data-m="med"><span class="mlabel">Medicine: double reading</span><p>Some screening programmes have two readers look at every mammogram independently. Double reading is standard practice in the United Kingdom and not in the United States, where insurers do not pay for it (<a href="https://en.wikipedia.org/wiki/Mammography" target="_blank" rel="noopener">Mammography</a>). It gives a running human&ndash;human agreement number for free: Dr Gale and Dr Hart, the same films, two verdicts.</p></div>
+    <div data-m="ump"><span class="mlabel">Umpires: two umpires, the same video</span><p>Live, only one umpire calls a pitch. To get a human&ndash;human bar you would have Ivo and June call the same pitches on video. Baseball rarely needs that bar, because tracking measures the truth directly; this is the one domain where step 2 can be skipped in favour of step 3 against a machine.</p></div>
+  </div>
+
+  <h2 id="classifier">3. Treat the judge as a classifier: split, tune, test once</h2>
+  <p>A pass/fail judge is a binary classifier, and the gold set is its labelled data, so the ordinary rules of classifier evaluation apply. Hamel Husain's version (Igor's <a href="https://idvork.in/ai-testing#humans-dont-agree-either" target="_blank" rel="noopener">AI testing</a> lists the same split):</p>
+  <ul>
+    <li><b>Train.</b> A small set of clear pass and fail items with their critiques. These are the only items allowed in the judge prompt, as few-shot examples. Hamel suggests 10&ndash;20% of the labels.</li>
+    <li><b>Dev.</b> Run the judge, read every disagreement with the humans, fix the prompt, run again. Iterate as much as you like.</li>
+    <li><b>Test.</b> Run once, when you think you are done. That run is the number you report. If you tune against it, it stops measuring anything. Hamel puts 40&ndash;45% each in dev and test, and aims for 30 to 50 items of each label in each.</li>
+  </ul>
+  <figure class="fig"><button type="button" class="media" aria-label="Enlarge figure: a horizontal bar of all labelled items split into three parts: train about 15 percent, used as few-shot examples in the prompt; dev about 42 percent, used to tune the prompt and inspect disagreements; test about 42 percent, looked at once. An arrow marks that dev and test items must never enter the prompt."><svg class="dg" viewBox="0 0 400 170" role="img" aria-label="The gold set split into train (about 15%), dev (about 42%) and test (about 42%)."><title>Splitting the gold set into train, dev and test.</title>
+    <text x="20" y="22" class="t-dim" font-size="10.5">THE GOLD SET (all labelled items)</text>
+    <rect x="20" y="34" width="54" height="44" rx="5" class="box-def"/>
+    <rect x="76" y="34" width="150" height="44" rx="5" class="box-off"/>
+    <rect x="228" y="34" width="152" height="44" rx="5" class="box-ok"/>
+    <text x="47" y="61" class="t-def" font-size="11" text-anchor="middle" font-weight="600">train</text>
+    <text x="151" y="61" class="t-off" font-size="11" text-anchor="middle" font-weight="600">dev</text>
+    <text x="304" y="61" class="t-ok" font-size="11" text-anchor="middle" font-weight="600">test</text>
+    <text x="47" y="96" class="t-dim" font-size="10" text-anchor="middle">~15%</text>
+    <text x="151" y="96" class="t-dim" font-size="10" text-anchor="middle">~42%</text>
+    <text x="304" y="96" class="t-dim" font-size="10" text-anchor="middle">~42%</text>
+    <text x="47" y="116" class="t-ink" font-size="10" text-anchor="middle">few-shot</text>
+    <text x="151" y="116" class="t-ink" font-size="10" text-anchor="middle">tune, read every miss</text>
+    <text x="304" y="116" class="t-ink" font-size="10" text-anchor="middle">run once, report</text>
+    <text x="200" y="150" class="t-crit" font-size="10.5" text-anchor="middle">dev and test items never go in the prompt</text>
+  </svg></button><figcaption>Proportions follow <a href="https://hamel.dev/blog/posts/llm-judge/" target="_blank" rel="noopener">Hamel Husain's</a> suggestion. The test slice is the practice-exam / final-exam split from Igor's <a href="https://idvork.in/subjective-evals#5-grade-the-grader" target="_blank" rel="noopener">step 5</a>.</figcaption></figure>
+  <p>Three rules go with the split.</p>
+  <p><strong>Report sensitivity and specificity separately</strong>, next to the human number. A single accuracy figure hides which way the judge errs, and when failures are rare a judge that passes everything looks excellent: Hamel's example is a 5% error rate, where always-pass scores 95% agreement and catches nothing. The casebook judge from <a href="p05.html">unit 05</a> is what a test-set report should look like: 48 of 60 YES items caught (sensitivity 0.80), 119 of 140 NO items cleared (specificity 0.85), stated as two numbers.</p>
+  <p><strong>Critique before verdict.</strong> Have the judge write its reasoning first and its binary label last, the same shape as the human critiques it learned from. Asking the evaluator to produce evidence before its rating is one of the three fixes Wang et al. propose for a judge that is too easy to sway (<a href="https://arxiv.org/abs/2305.17926" target="_blank" rel="noopener">Wang et al. 2023</a>). The critique is also what you read in dev when the judge and the humans split.</p>
+  <p><strong>Pin the model version.</strong> A judge is the prompt <em>and</em> the model behind it. Name the exact model snapshot in config, so last month's scores mean the same thing as this month's; when you change it, you have a new judge and you go back to the test set. Hamel's answer to &ldquo;How do you ensure consistency when updating your LLM model?&rdquo; is the same: go through the process again and measure.</p>
+  <div class="mx case">
+    <div data-m="hire"><span class="mlabel">Hiring: who checks the new interviewer</span><p>A new interviewer is checked against experienced ones on candidates both saw, and their scorecards are read, not just their verdicts: a &ldquo;no hire&rdquo; with no written reason is sent back. The written reason is the critique; reading it is how the debrief catches an interviewer who is rejecting for the wrong thing.</p></div>
+    <div data-m="review"><span class="mlabel">Reviews: the first-time manager</span><p>A first-time manager's proposed ratings are compared with what the calibration committee settles on. If Carla's &ldquo;exceeds&rdquo; keeps being moved down, nobody needs her overall agreement rate to see it; what matters is which direction she errs, the review-world version of sensitivity and specificity.</p></div>
+    <div data-m="wine"><span class="mlabel">Wine: scoring the judge, not just the wine</span><p>The AWAC gives each participant a statistical report on their own tasting: <em>discrimination</em> (how well they separate good wines from weak), <em>reliability</em> (whether they reproduce their scores on a second tasting), the average gap between repeat scores, and <em>stability</em>, a count of whether they drift up or down the second time (<a href="https://www.awri.com.au/wp-content/uploads/2023/02/01-AWAC-Course-Notes-28092022-1.pdf" target="_blank" rel="noopener">AWAC course notes</a>). That is a judge evaluated as an instrument, number by number.</p></div>
+    <div data-m="med"><span class="mlabel">Medicine: sensitivity and specificity were born here</span><p>Diagnostic medicine describes a test or a reader with sensitivity and specificity rather than a single accuracy, because missing a cancer and recalling a healthy patient cost such different things. A radiologist with 0.80 sensitivity and 0.85 specificity is described with both numbers.</p></div>
+    <div data-m="ump"><span class="mlabel">Umpires: graded call by call</span><p>MLB grades its plate umpires against pitch tracking. The grading allows a small buffer around the zone; for the 2025 season it was reported to have shrunk from two inches on all sides to three-quarters of an inch (<a href="https://www.cbssports.com/mlb/news/mlb-changed-its-evaluation-of-umpires-leading-to-fewer-called-strikes-on-edges-of-zone-per-report" target="_blank" rel="noopener">CBS Sports, relaying The Athletic</a>). Called strikes and called balls are wrong in different ways, so a serious report keeps them apart.</p></div>
+  </div>
+
+  <h2 id="bias-checks">4. Run the bias checks</h2>
+  <p>A judge that passes the test set can still be pushed around by things that have nothing to do with quality (<a href="p06.html">units 06</a> and <a href="p07.html">07</a>). Three checks are cheap enough to run on every new judge.</p>
+  <p><strong>Swap positions.</strong> For pairwise judging, present every pair in both orders and count only the verdicts that survive. Wang et al. showed how much this matters: with ChatGPT as the evaluator, simply changing the order let Vicuna-13B beat ChatGPT on 66 of 80 queries (<a href="https://arxiv.org/abs/2305.17926" target="_blank" rel="noopener">Wang et al. 2023</a>). One of their fixes aggregates the verdicts across both orders. In the illustrative casebook swap from unit 06, 62 of 100 pairs keep their verdict, and the inconsistent 38 lean toward whichever answer came first (30 to 8). A judge like that has a usable verdict on about 62 pairs; the other 38 are ties.</p>
+  <p><strong>Re-run the same items.</strong> Grade the test set again, with the same prompt and the sampling settings you will use in production, and count how many verdicts change. This is self-consistency, and it caps everything else: a judge that disagrees with itself on an item cannot be reliably right about it. If the flip rate is high, take a majority of several runs or lower the temperature, and say which you did.</p>
+  <p><strong>Length-controlled pairs.</strong> Build pairs where one answer is the other plus padding: the same content restated, an extra list of near-duplicate points, a longer preamble. A judge that prefers the padded version is rewarding length, not quality. Run the same trick for the other cues you worry about, such as confident tone or markdown formatting.</p>
+  <div class="mx case">
+    <div data-m="hire"><span class="mlabel">Hiring: order and polish</span><p>The hiring version of a position swap is the order candidates are seen in, and of length padding is the candidate who talks longest and most fluently. Structured scorecards exist partly to stop the most polished answer winning on polish. Re-scoring a recorded interview a week later is the self-consistency check most teams never run.</p></div>
+    <div data-m="review"><span class="mlabel">Reviews: recency and volume</span><p>A half-year of work read in one sitting gets the recency treatment: the last month weighs more than the first. Padding has its review version too, the self-assessment that lists everything. Asking a manager to re-rate an anonymised packet from last cycle is the review-world re-run.</p></div>
+    <div data-m="wine"><span class="mlabel">Wine: replicate pours</span><p>The wine world invented the re-run. Hodgson had the California State Fair embed triplicate samples poured from the same bottle in judges' flights of 30 wines, from 2005 to 2008. Only about 10% of judges scored the same wine within a single medal group each time, and another 10% on occasion scored the same wine Bronze and Gold (<a href="https://doi.org/10.1017/s1931436100001152" target="_blank" rel="noopener">Hodgson 2008</a>). Position bias has a wine version too: in a large tasting experiment the first wine of a short sequence had a large advantage when people picked their favourite (<a href="https://doi.org/10.1111/j.1467-9280.2009.02453.x" target="_blank" rel="noopener">Mantonakis et al. 2009</a>).</p></div>
+    <div data-m="med"><span class="mlabel">Medicine: reading the same films again</span><p>The medical re-run is to show a radiologist films they have already read, after a gap and mixed in with others, and count how often their verdict changes. That separates a reader's disagreement with themselves from disagreement between Dr Gale and Dr Hart, and the first caps the second.</p></div>
+    <div data-m="ump"><span class="mlabel">Umpires: what the last call did</span><p>Umpires show a sequence effect: after calling a strike, they are less likely to call the next pitch a strike, the same gambler's-fallacy pattern found in asylum judges and loan officers (<a href="https://doi.org/10.1093/qje/qjw017" target="_blank" rel="noopener">Chen, Moskowitz and Shue 2016</a>). That is the umpire's version of position bias: something other than the pitch moves the call.</p></div>
+  </div>
+
+  <h2 id="error-bars">5. Put error bars on everything</h2>
+  <p>Every number from steps 2 to 4 is an estimate from a few hundred items at most, and the intervals at that size are wide. The casebook makes the point with its own numbers:</p>
+  <div class="statgrid">
+    <div class="s"><div class="k">human&ndash;human &kappa;</div><div class="v">0.49</div><div class="n">95% CI 0.32&ndash;0.66, n = 100</div></div>
+    <div class="s"><div class="k">judge sensitivity</div><div class="v">0.80</div><div class="n">48/60 &middot; Wilson 0.68&ndash;0.88</div></div>
+    <div class="s"><div class="k">judge specificity</div><div class="v">0.85</div><div class="n">119/140 &middot; Wilson 0.78&ndash;0.90</div></div>
+  </div>
+  <p>Read the first tile honestly: on 100 items, the human agreement could be anywhere from &ldquo;fair&rdquo; to &ldquo;substantial&rdquo;. A judge whose own kappa lands at 0.45 cannot be told apart from the humans on this data, and neither could one at 0.60. The sensitivity interval is wider than the specificity one because it rests on 60 YES items, not 140 NO items: an interval's width depends on how many items of that class you have, not on the total. Formulas are in the appendix (<a href="math.html#ci">confidence intervals</a>).</p>
+  <figure class="fig"><button type="button" class="media" aria-label="Enlarge figure: two panels on a scale from 0.6 to 1.0. Top panel, an illustration: the same 80 percent point estimate from 50 items has an interval from 0.67 to 0.89, and from 500 items an interval from 0.76 to 0.83. Bottom panel, the casebook: sensitivity 0.80 with interval 0.68 to 0.88 from 60 YES items, and specificity 0.85 with interval 0.78 to 0.90 from 140 NO items."><svg class="dg" viewBox="0 0 400 290" role="img" aria-label="Error bars: the same 0.80 estimate is much wider at n=50 than at n=500; the casebook sensitivity and specificity intervals sit between."><title>Same point estimate, very different error bars.</title>
+    <text x="20" y="20" class="t-def" font-size="10.5" font-weight="600">ILLUSTRATION: 80% AGREEMENT</text>
+    <line x1="110.0" y1="30" x2="110.0" y2="258" class="grid"/><line x1="245.0" y1="30" x2="245.0" y2="258" class="grid"/><line x1="380.0" y1="30" x2="380.0" y2="258" class="grid"/>
+    <text x="20" y="58" class="t-ink" font-size="11">n = 50</text>
+    <line x1="157.3" y1="54" x2="305.8" y2="54" class="ln-off" stroke-width="3"/><line x1="157.3" y1="47" x2="157.3" y2="61" class="ln-off"/><line x1="305.8" y1="47" x2="305.8" y2="61" class="ln-off"/><circle cx="245.0" cy="54" r="5" fill="var(--off)"/>
+    <text x="153.3" y="76" class="t-dim" font-size="9.5" text-anchor="middle">0.67</text><text x="309.8" y="76" class="t-dim" font-size="9.5" text-anchor="middle">0.89</text>
+    <text x="20" y="104" class="t-ink" font-size="11">n = 500</text>
+    <line x1="218.0" y1="100" x2="265.2" y2="100" class="ln-off" stroke-width="3"/><line x1="218.0" y1="93" x2="218.0" y2="107" class="ln-off"/><line x1="265.2" y1="93" x2="265.2" y2="107" class="ln-off"/><circle cx="245.0" cy="100" r="5" fill="var(--off)"/>
+    <text x="214.0" y="122" class="t-dim" font-size="9.5" text-anchor="middle">0.76</text><text x="269.2" y="122" class="t-dim" font-size="9.5" text-anchor="middle">0.83</text>
+    <line x1="20" y1="140" x2="380" y2="140" class="ln"/>
+    <text x="20" y="162" class="t-off" font-size="10.5" font-weight="600">CASEBOOK JUDGE (UNIT 05)</text>
+    <text x="20" y="190" class="t-ink" font-size="11">sens 48/60</text>
+    <line x1="164.0" y1="186" x2="299.0" y2="186" class="ln-def" stroke-width="3"/><line x1="164.0" y1="179" x2="164.0" y2="193" class="ln-def"/><line x1="299.0" y1="179" x2="299.0" y2="193" class="ln-def"/><circle cx="245.0" cy="186" r="5" fill="var(--def)"/>
+    <text x="160.0" y="208" class="t-dim" font-size="9.5" text-anchor="middle">0.68</text><text x="303.0" y="208" class="t-dim" font-size="9.5" text-anchor="middle">0.88</text>
+    <text x="20" y="236" class="t-ink" font-size="11">spec 119/140</text>
+    <line x1="231.5" y1="232" x2="312.5" y2="232" class="ln-def" stroke-width="3"/><line x1="231.5" y1="225" x2="231.5" y2="239" class="ln-def"/><line x1="312.5" y1="225" x2="312.5" y2="239" class="ln-def"/><circle cx="278.8" cy="232" r="5" fill="var(--def)"/>
+    <text x="227.5" y="254" class="t-dim" font-size="9.5" text-anchor="middle">0.78</text><text x="316.5" y="254" class="t-dim" font-size="9.5" text-anchor="middle">0.90</text>
+    <text x="110.0" y="278" class="t-dim" font-size="10" text-anchor="middle">0.6</text><text x="245.0" y="278" class="t-dim" font-size="10" text-anchor="middle">0.8</text><text x="380.0" y="278" class="t-dim" font-size="10" text-anchor="middle">1.0</text>
+  </svg></button><figcaption>95% Wilson intervals. The top panel is an illustration, not casebook data: the same 80% point estimate, ten times the items, roughly a third of the width. The bottom panel is the casebook judge from unit 05.</figcaption></figure>
+  <p>A rough sample-size intuition, using the normal approximation (details in <a href="math.html#sample-size">sample size</a>): the half-width of a 95% interval on a proportion near 0.8 is about 1.96 &times; &radic;(0.16 / n). That is &plusmn;0.11 at n = 50, &plusmn;0.08 at 100, &plusmn;0.04 at 400. To pin a judge's sensitivity to &plusmn;0.05 you need roughly 250 YES items; at a 30% YES rate, that is something like 800 labelled items in total. To pin it to &plusmn;0.10, about 60 YES items will do. Quadruple the items to halve the width. Hamel's own rule of thumb points the same way: below about 60 examples the intervals are often too wide to conclude anything useful, and he aims for around 100 per failure mode.</p>
+  <p>The same rule applies when the judge is later used to compare two systems: report each score with its interval, as in <a href="https://idvork.in/subjective-evals#6-turn-it-into-a-benchmark-and-report-the-noise" target="_blank" rel="noopener">Igor's step 6</a>, or you cannot say whether version B beat version A or got lucky.</p>
+  <div class="mx case">
+    <div data-m="hire"><span class="mlabel">Hiring: the small-sample interviewer</span><p>An interviewer who has run 30 loops has a hire rate with an interval wider than the gap between &ldquo;tough&rdquo; and &ldquo;soft&rdquo;. Calling Ana a harsh interviewer on that sample is reading noise.</p></div>
+    <div data-m="review"><span class="mlabel">Reviews: one manager, eight reports</span><p>A manager with eight reports who rated three as &ldquo;exceeds&rdquo; is not detectably more generous than one who rated two. Calibration committees that treat those differences as real are ranking noise.</p></div>
+    <div data-m="wine"><span class="mlabel">Wine: one flight is not a verdict on the judge</span><p>A judge who scored one triplicate inconsistently in one flight might be unreliable or might have had one bad glass. Hodgson's study ran over four years and 65&ndash;70 judges a year for a reason.</p></div>
+    <div data-m="med"><span class="mlabel">Medicine: few cancers per reader</span><p>Cancers are rare in screening, so one radiologist's year produces only a handful of confirmed positives. Any per-reader sensitivity built on a handful of cancers has a very wide interval, so one year of one reader's numbers says little on its own.</p></div>
+    <div data-m="ump"><span class="mlabel">Umpires: thousands of calls</span><p>A plate umpire calls thousands of pitches a season, so the interval on his overall accuracy is narrow. The noise moves to the slices: called strikes on the low edge for one umpire in one month is a small sample again.</p></div>
+  </div>
+
+  <h2 id="routing">6. Route on confidence: the judge takes the clear cases</h2>
+  <p>A judge does not have to decide everything. Have it return a score, not just a verdict, and use two thresholds: above the top one the judge's verdict stands, below the bottom one it stands the other way, and everything in between goes to a person, or to a stronger and more expensive grader. That keeps people for the work only they can do. Igor's recipe describes the same tiers among <a href="https://idvork.in/subjective-evals#4-build-an-automatic-stand-in-for-the-humans" target="_blank" rel="noopener">human reviewers</a>: frontline reviewers take the clear calls and the confusing ones go up.</p>
+  <figure class="fig"><button type="button" class="media" aria-label="Enlarge figure: outputs enter the judge, which returns a confidence score from 0 to 1. A score bar is divided into three bands: low scores are settled automatically as fail, high scores automatically as pass, and the uncertain middle band is sent to a human reviewer. Audit samples are drawn from all three bands."><svg class="dg" viewBox="0 0 400 260" role="img" aria-label="Confidence routing: low and high judge scores are settled automatically, the middle band goes to a person; audits sample all bands."><title>Confidence routing.</title>
+    <rect x="20" y="20" width="90" height="40" rx="6" class="box"/>
+    <g class="mx">
+      <text data-m="hire" x="65" y="45" class="t-ink" font-size="11" text-anchor="middle">candidates</text>
+      <text data-m="review" x="65" y="45" class="t-ink" font-size="11" text-anchor="middle">employees</text>
+      <text data-m="wine" x="65" y="45" class="t-ink" font-size="11" text-anchor="middle">wines</text>
+      <text data-m="med" x="65" y="45" class="t-ink" font-size="11" text-anchor="middle">scans</text>
+      <text data-m="ump" x="65" y="45" class="t-ink" font-size="11" text-anchor="middle">pitches</text>
+    </g>
+    <line x1="110" y1="40" x2="144" y2="40" class="ln"/><polygon class="ah" points="150,40 142,36 142,44"/>
+    <rect x="150" y="20" width="110" height="40" rx="6" class="box-off"/>
+    <g class="mx">
+      <text data-m="hire" x="205" y="45" class="t-off" font-size="11" text-anchor="middle">interviewer</text>
+      <text data-m="review" x="205" y="45" class="t-off" font-size="11" text-anchor="middle">manager</text>
+      <text data-m="wine" x="205" y="45" class="t-off" font-size="11" text-anchor="middle">judge</text>
+      <text data-m="med" x="205" y="45" class="t-off" font-size="11" text-anchor="middle">radiologist</text>
+      <text data-m="ump" x="205" y="45" class="t-off" font-size="11" text-anchor="middle">umpire</text>
+    </g>
+    <text x="280" y="38" class="t-dim" font-size="10">or LLM judge:</text>
+    <text x="280" y="52" class="t-dim" font-size="10">score 0 → 1</text>
+    <line x1="205" y1="60" x2="205" y2="84" class="ln"/><polygon class="ah" points="205,90 201,82 209,82"/>
+    <rect x="20" y="92" width="110" height="30" rx="4" class="box-crit"/>
+    <rect x="130" y="92" width="140" height="30" rx="4" class="box-def"/>
+    <rect x="270" y="92" width="110" height="30" rx="4" class="box-ok"/>
+    <text x="75" y="112" class="t-crit" font-size="10.5" text-anchor="middle">clearly low</text>
+    <text x="200" y="112" class="t-def" font-size="10.5" text-anchor="middle">uncertain middle</text>
+    <text x="325" y="112" class="t-ok" font-size="10.5" text-anchor="middle">clearly high</text>
+    <line x1="75" y1="122" x2="75" y2="150" class="ln-crit"/><polygon class="ah-crit" points="75,156 71,148 79,148"/>
+    <line x1="200" y1="122" x2="200" y2="150" class="ln-def"/><polygon class="ah-def" points="200,156 196,148 204,148"/>
+    <line x1="325" y1="122" x2="325" y2="150" class="ln"/><polygon class="ah" points="325,156 321,148 329,148"/>
+    <g class="mx">
+      <text data-m="hire" x="75" y="174" class="t-ink" font-size="11" text-anchor="middle">auto: no hire</text>
+      <text data-m="review" x="75" y="174" class="t-ink" font-size="11" text-anchor="middle">auto: meets</text>
+      <text data-m="wine" x="75" y="174" class="t-ink" font-size="11" text-anchor="middle">auto: no medal</text>
+      <text data-m="med" x="75" y="174" class="t-ink" font-size="11" text-anchor="middle">auto: clear</text>
+      <text data-m="ump" x="75" y="174" class="t-ink" font-size="11" text-anchor="middle">auto: ball</text>
+    </g>
+    <g class="mx">
+      <text data-m="hire" x="200" y="174" class="t-ink" font-size="11" text-anchor="middle">hiring committee</text>
+      <text data-m="review" x="200" y="174" class="t-ink" font-size="11" text-anchor="middle">calibration mtg</text>
+      <text data-m="wine" x="200" y="174" class="t-ink" font-size="11" text-anchor="middle">panel discussion</text>
+      <text data-m="med" x="200" y="174" class="t-ink" font-size="11" text-anchor="middle">second reader</text>
+      <text data-m="ump" x="200" y="174" class="t-ink" font-size="11" text-anchor="middle">challenge review</text>
+    </g>
+    <g class="mx">
+      <text data-m="hire" x="325" y="174" class="t-ink" font-size="11" text-anchor="middle">auto: hire</text>
+      <text data-m="review" x="325" y="174" class="t-ink" font-size="11" text-anchor="middle">auto: exceeds</text>
+      <text data-m="wine" x="325" y="174" class="t-ink" font-size="11" text-anchor="middle">auto: medal</text>
+      <text data-m="med" x="325" y="174" class="t-ink" font-size="11" text-anchor="middle">auto: recall</text>
+      <text data-m="ump" x="325" y="174" class="t-ink" font-size="11" text-anchor="middle">auto: strike</text>
+    </g>
+    <rect x="20" y="200" width="360" height="40" rx="6" class="box"/>
+    <text x="200" y="217" class="t-dim" font-size="10.5" text-anchor="middle">audit samples drawn from ALL three bands,</text>
+    <text x="200" y="232" class="t-dim" font-size="10.5" text-anchor="middle">not only the middle one</text>
+  </svg></button><figcaption>The judge settles the ends, people take the middle. The thresholds are set on dev data, and the bottom box is step 7: audit the auto-settled bands too, or their errors are invisible.</figcaption></figure>
+  <p>Routing only works if the score means something: an item scored 0.9 should be right about nine times in ten. A judge that is confidently wrong sends nothing to people and keeps its errors. <a href="https://hightouch.com/blog/llm-judges-identity-resolution" target="_blank" rel="noopener">Hightouch's write-up</a> on auditing merged customer identities (a synthetic benchmark; the escalation tier there was a larger model, not a person) shows both halves. A small model's score settled most cases, and only those it scored between 30% and 90% went to Claude Opus: 22% of the items, for 98.8% accuracy against Opus alone at 99.0%, at $0.88 instead of $3.86 per thousand. A second small model that was more accurate on its own was worse calibrated; on a harder test set its hybrid fell to 91.6% while the better-calibrated one held 95.3%. Igor summarises the same result in <a href="https://idvork.in/ai-testing#humans-dont-agree-either" target="_blank" rel="noopener">AI testing</a>. The lesson transfers directly: pick the judge for calibration, not only for accuracy, if you plan to route.</p>
+  <p>To set the band, plot accuracy against the judge's score on the dev set, choose the width of the middle band from how many items people can afford to read, and check on the test set that the auto-settled bands really are as accurate as you need.</p>
+  <div class="mx case">
+    <div data-m="hire"><span class="mlabel">Hiring: the debrief spends its time on the split loops</span><p>When every interviewer says &ldquo;strong hire&rdquo; or every one says &ldquo;no hire&rdquo;, the debrief is short. The time goes to the mixed loops. A hiring committee is a routing system: clear calls pass through, borderline candidates get the expensive attention.</p></div>
+    <div data-m="review"><span class="mlabel">Reviews: the meeting discusses the boundary</span><p>A calibration meeting does not re-argue the employee everyone agrees is solidly &ldquo;meets&rdquo;. It spends its hour on the people near a boundary, which is the uncertain middle band done by managers.</p></div>
+    <div data-m="wine"><span class="mlabel">Wine: the panel talks about the splits</span><p>When Elodie and Femi both score a wine far from the medal line, the score stands. When they straddle it, the panel discusses the glass, Discussion is the expensive tier, and it is spent on the glasses near the cut.</p></div>
+    <div data-m="med"><span class="mlabel">Medicine: second opinions for the hard films</span><p>A clearly normal film and a clearly suspicious one need no debate. Second readers and consensus review earn their cost on the films in between, where one reader is least sure.</p></div>
+    <div data-m="ump"><span class="mlabel">Umpires: challenge the close ones</span><p>Baseball's automated ball-strike challenge system, used from 2026 (<a href="https://blogs.fangraphs.com/your-final-pre-robo-zone-umpire-accuracy-update" target="_blank" rel="noopener">FanGraphs</a>), leaves the umpire to call every pitch and lets players send a call to the tracking system for review. The calls that get challenged tend to be the close ones: the uncertain middle, sent to the stronger grader.</p></div>
+  </div>
+
+  <h2 id="audit">7. Keep auditing</h2>
+  <p>A judge that passed its test set in March is a claim about March. The traffic changes, the policy gets edited, the model provider ships a new snapshot, and someone tweaks the prompt to fix one complaint. Three habits keep the validation alive (<a href="https://idvork.in/subjective-evals#9-keep-watching-feed-failures-back-repeat" target="_blank" rel="noopener">Igor's step 9</a> is the same loop):</p>
+  <ul>
+    <li><b>Re-label a sample on a schedule.</b> Each week or month, people label a fresh random sample of live items, drawn from all the routing bands, and you recompute sensitivity and specificity against them. New failures go into the gold set.</li>
+    <li><b>Drift alarms.</b> Watch numbers that need no labels: the judge's YES rate, the share of items in the uncertain band, the self-consistency flip rate. A sudden change in any of them means something moved, even before you know what.</li>
+    <li><b>Re-calibrate on every change.</b> A new model version, a new prompt or a new rubric is a new judge: re-run the test set, and the bias checks, before its scores replace the old ones. Keep the old judge's scores labelled with its version so nobody compares across the change.</li>
+  </ul>
+  <p>Watch the other direction too. When the grader changes, the thing being graded adapts to it. The umpire story below is the clearest case, and it is <a href="https://en.wikipedia.org/wiki/Goodhart%27s_law" target="_blank" rel="noopener">Goodhart's law</a> at work on systems tuned against your judge: once a team hill-climbs on its scores, the audit sample is the only thing still measuring what you meant.</p>
+  <div class="mx case">
+    <div data-m="hire"><span class="mlabel">Hiring: checking interviews against outcomes</span><p>The audit in hiring is slow and partial: compare interview scores with how the people hired actually performed a year later, the method industrial psychologists use to validate selection (<a href="https://doi.org/10.1037/0033-2909.124.2.262" target="_blank" rel="noopener">Schmidt and Hunter 1998</a>). It can never see the rejected candidates, which is the hiring version of only auditing one routing band.</p></div>
+    <div data-m="review"><span class="mlabel">Reviews: every cycle is a re-calibration</span><p>Review processes re-run calibration every cycle rather than trusting last year's, because managers change, teams change and rating habits drift. A manager whose share of &ldquo;exceeds&rdquo; jumps from one cycle to the next is a drift alarm, whatever the reason turns out to be.</p></div>
+    <div data-m="wine"><span class="mlabel">Wine: the study that kept running</span><p>Hodgson's replicate pours ran over four competitions, 2005 to 2008, testing 65&ndash;70 judges each year rather than once (<a href="https://doi.org/10.1017/s1931436100001152" target="_blank" rel="noopener">Hodgson 2008</a>). A competition that tests its judges once and trusts them forever is validating March.</p></div>
+    <div data-m="med"><span class="mlabel">Medicine: the audit is the law</span><p>In the United States, MQSA requires every mammography facility to run a medical outcomes audit: follow up positive assessments, correlate them with pathology results, and analyse at least once every 12 months, for each interpreting physician and for the group, with at minimum the positive predictive value, cancer detection rate and recall rate (<a href="https://www.law.cornell.edu/cfr/text/21/900.12" target="_blank" rel="noopener">21 CFR 900.12(f)</a>). Note what it centres on: following up the recalls. The misses are harder to see, the same blind spot as auditing only the YES band.</p></div>
+    <div data-m="ump"><span class="mlabel">Umpires: change the grader, change the calls</span><p>When MLB shrank the grading buffer for 2025, umpires called fewer strikes on the edges of the zone (<a href="https://www.cbssports.com/mlb/news/mlb-changed-its-evaluation-of-umpires-leading-to-fewer-called-strikes-on-edges-of-zone-per-report" target="_blank" rel="noopener">CBS Sports</a>), and overall accuracy reached a record 92.83% that season (<a href="https://blogs.fangraphs.com/your-final-pre-robo-zone-umpire-accuracy-update" target="_blank" rel="noopener">FanGraphs</a>). The judged adjusted to the grader within a season, which is exactly what a team optimising against your LLM judge will do.</p></div>
+  </div>
+
+  <div class="callout"><b>Carry this away.</b> Validate an LLM judge the way you would qualify a new human one. People and a written policy come first, and their agreement sets the bar. The judge is tuned on one slice of the labels and tested once on another, with YES and NO reported separately and the model version pinned. Bias checks and error bars come before anyone quotes a number. People keep the uncertain middle and audit everything else, and any change to model, prompt or traffic sends you back to the gold set.</div>
+
+  <h2 id="can-say">What you can say now</h2>
+  <ul>
+    <li>The policy and human labels on real outputs come before the judge prompt, and the first labels are drafts because grading changes the criteria.</li>
+    <li>Human&ndash;human agreement on the same items, measured the same way, is the bar a judge has to reach; compare judge-versus-human with human-versus-human, not with judge-versus-consensus.</li>
+    <li>A judge is a classifier: few-shot from train, tune on dev, test once on held-out items, report sensitivity and specificity separately, critique before verdict, pin the model.</li>
+    <li>Position swaps, re-runs of the same items and length-padded pairs are cheap checks that catch the best-known biases.</li>
+    <li>At 100&ndash;200 items the intervals are wide (kappa 0.32&ndash;0.66, sensitivity 0.68&ndash;0.88); interval width depends on the count in each class, and halving it takes four times the items.</li>
+    <li>Confidence routing lets the judge settle the clear cases and sends the middle to people, but only if the judge's scores are calibrated.</li>
+    <li>Auditing never stops: sample all routing bands, watch label-free drift signals, and treat any model or prompt change as a new judge.</li>
+  </ul>
+
+  <h2 id="sources">Sources</h2>
+  <ul class="readings">
+    <li><a href="https://idvork.in/subjective-evals" target="_blank" rel="noopener">Igor Dvorkin, Evals with no right answer: a recipe</a> &middot; policy first, calibrate the humans, grade the grader, report the noise, keep watching.</li>
+    <li><a href="https://idvork.in/ai-testing#humans-dont-agree-either" target="_blank" rel="noopener">Igor Dvorkin, AI testing: humans don't agree either</a> &middot; the judge-as-classifier checklist and confidence routing.</li>
+    <li><a href="https://hamel.dev/blog/posts/llm-judge/" target="_blank" rel="noopener">Hamel Husain, Using LLM-as-a-Judge for evaluation</a> &middot; critiques, train/dev/test split, true positive and true negative rates, sample sizes.</li>
+    <li><a href="https://arxiv.org/abs/2404.12272" target="_blank" rel="noopener">Shankar et al. 2024, Who Validates the Validators?</a> &middot; EvalGen and criteria drift.</li>
+    <li><a href="https://arxiv.org/abs/2305.17926" target="_blank" rel="noopener">Wang et al. 2023, Large Language Models are not Fair Evaluators</a> &middot; position bias and the evidence-first and balanced-position fixes.</li>
+    <li><a href="https://hightouch.com/blog/llm-judges-identity-resolution" target="_blank" rel="noopener">Hightouch, LLM judges for identity resolution</a> &middot; confidence routing to a stronger model, and why calibration decides it.</li>
+    <li><a href="https://www.awri.com.au/wp-content/uploads/2023/02/01-AWAC-Course-Notes-28092022-1.pdf" target="_blank" rel="noopener">AWRI, Advanced Wine Assessment Course notes</a> &middot; palate alignment and judges scored on discrimination, reliability and stability.</li>
+    <li><a href="https://doi.org/10.1017/s1931436100001152" target="_blank" rel="noopener">Hodgson 2008, An examination of judge reliability at a major U.S. wine competition</a> &middot; triplicate pours, 2005&ndash;2008.</li>
+    <li><a href="https://doi.org/10.1111/j.1467-9280.2009.02453.x" target="_blank" rel="noopener">Mantonakis et al. 2009, Order in choice</a> &middot; order effects in wine tasting.</li>
+    <li><a href="https://www.law.cornell.edu/cfr/text/21/900.12" target="_blank" rel="noopener">21 CFR 900.12(f), the MQSA medical outcomes audit</a> &middot; the yearly per-physician audit.</li>
+    <li><a href="https://en.wikipedia.org/wiki/Mammography" target="_blank" rel="noopener">Mammography (Wikipedia)</a> &middot; single and double reading.</li>
+    <li><a href="https://www.cbssports.com/mlb/news/mlb-changed-its-evaluation-of-umpires-leading-to-fewer-called-strikes-on-edges-of-zone-per-report" target="_blank" rel="noopener">CBS Sports 2025, MLB changed its evaluation of umpires</a> &middot; the grading buffer and its effect on calls.</li>
+    <li><a href="https://blogs.fangraphs.com/your-final-pre-robo-zone-umpire-accuracy-update" target="_blank" rel="noopener">FanGraphs, Your final pre-robo-zone umpire accuracy update</a> &middot; 2025 accuracy and the 2026 challenge system.</li>
+    <li><a href="https://doi.org/10.1093/qje/qjw017" target="_blank" rel="noopener">Chen, Moskowitz and Shue 2016, Decision making under the gambler's fallacy</a> &middot; sequence effects in asylum judges, loan officers and umpires.</li>
+    <li><a href="https://doi.org/10.1037/0033-2909.124.2.262" target="_blank" rel="noopener">Schmidt and Hunter 1998, The validity and utility of selection methods</a> &middot; validating hiring against later performance.</li>
+  </ul>
+
+  <div class="callout">Next: <a class="lnk" href="p09.html">When not to trust a judge</a> &middot; Back to <a class="lnk" href="../index.html#using">the map</a>.</div>
+</main>
+<footer>Original explanation, compiled November 2026. Every example switches with the metaphor menu; the arithmetic never does. Part of <a href="../index.html">LLM Judges, mapped</a>.</footer>
+<script src="../fig.js" defer></script>
+</body>
+</html>
