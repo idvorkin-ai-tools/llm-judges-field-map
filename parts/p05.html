@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Judge versus truth &mdash; LLM Judges, mapped</title>
+<meta name="description" content="Validity for an LLM judge: the confusion matrix against a reference, sensitivity and specificity versus precision and recall, why accuracy misleads, Youden's J, base rates, ROC curves, AUC, and choosing a threshold by cost." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="../paper.css" />
+<script src="../site.js"></script>
+</head>
+<body>
+<header class="bar"><div class="bar-in">
+  <div class="brand"><span class="dot"></span>LLM&nbsp;JUDGES&nbsp;//&nbsp;FIELD&nbsp;MAP</div>
+  <a class="back" href="../index.html#measuring">&larr; the map</a>
+</div></header>
+<main>
+  <div class="eyebrow"><span class="box wb mono">MEASURING THE JUDGE &middot; UNIT 05 OF 09</span><span class="mono">validity &middot; confusion matrix &middot; Youden's J &middot; ROC</span></div>
+  <h1>Judge versus truth: the confusion matrix, Youden's J and ROC</h1>
+  <div class="authors">Unit 04 asked whether judges agree with each other. This unit asks whether a judge agrees with the truth, and borrows the whole toolkit from diagnostic medicine, which has been asking that question about X-ray readers since 1947.</div>
+
+  <div class="tldr"><b>TL;DR &mdash;</b> To check a judge's validity, run it on items whose true label is known and count four cells: right YES, missed YES, false YES, right NO. Medicine reads those cells as sensitivity and specificity; information retrieval and ML read the same cells as recall and precision. Accuracy hides the trade-off (a judge that always says NO scores 0.70 on the casebook set). Youden's J, sensitivity plus specificity minus one, is 0.65 for the casebook judge and does not depend on how common YES is, which makes it portable and also blind to what users actually see: at 5% prevalence the same judge's YES is right only 22% of the time. If the judge emits a score, every threshold gives a different matrix; the ROC curve draws them all, and its area (0.868 here) is the chance a random YES item outscores a random NO item. Pick the deployed threshold by what each kind of error costs, not by J. And before any of it, be honest about where the &ldquo;truth&rdquo; column came from.</div>
+
+  <p class="lead">Agreement between judges is reliability. It says the instrument is steady. Validity asks the harder question: does the instrument point at the right thing? The only way to answer it is to line the judge's verdicts up against something better than the judge, and count where they match and where they do not. Everything on this page is a way of reading that count.</p>
+
+  <h2 id="reference">What the judge is compared against</h2>
+  <p>For an LLM judge the comparison set is a <b>gold set</b>: a few hundred outputs, each labelled pass or fail by people who have been trained on the policy and checked against each other (<a href="p04.html">unit 04</a>). That gold set is called the truth, but it is a reference, not an oracle. Its labels are only as good as the labellers' agreement, which is why Igor's <a href="https://idvork.in/subjective-evals#5-grade-the-grader" target="_blank" rel="noopener">evals recipe</a> grades the grader only after it has made sure humans can apply the policy consistently. A judge cannot be shown to be more valid than the reference it is scored against.</p>
+  <p>The five domains have very different references, and the arithmetic below treats them all the same, so the honesty has to come from the words. In the casebook each domain uses the same 200 items and the same four counts. What changes is how much those counts deserve to be called validity.</p>
+  <div class="mx case">
+    <div data-m="hire"><span class="mlabel">Truth in hiring: late, and hires only</span><p>The reference is how each hire performs a year later, itself usually a manager's rating. Candidates the interviewer rejected never generate an outcome, so the &ldquo;no hire&rdquo; column of the table cannot be filled from real data. Statisticians call this selection bias, and in diagnostic testing <i>verification bias</i>: the judge's own verdict decides who gets checked. The casebook pretends every candidate was hired and followed up. Real hiring can measure only how many of its hires turned out well, which is precision, and never how many good people it turned away.</p></div>
+    <div data-m="review"><span class="mlabel">Truth in reviews: a committee, not a fact</span><p>The reference is the calibration committee's final rating. There is no outside measurement of whether an employee &ldquo;really&rdquo; exceeded expectations, so the table compares one manager to a group of managers. That is a useful check, because a group is steadier than one person, but strictly it is reliability against a privileged rater. If the whole committee shares a blind spot, the table cannot see it.</p></div>
+    <div data-m="wine"><span class="mlabel">Truth in wine: a senior panel</span><p>The reference is a panel of senior judges who taste the same flight and agree on which wines deserve a medal. Nothing outside the glass confirms them; a lab can confirm a fault such as cork taint, not quality. So the table measures how often one judge matches the panel, and calls that validity only by convention. Hodgson's replicate-pour work (<a href="https://doi.org/10.1017/s1931436100001152" target="_blank" rel="noopener">Hodgson 2008</a>) is a reminder that the panel's members are noisy instruments too.</p></div>
+    <div data-m="med"><span class="mlabel">Truth in medicine: biopsy and follow-up</span><p>The reference is biopsy for the patients who were recalled and a clean year of follow-up for those who were cleared. That is the strongest reference outside umpiring, and medicine invented these statistics because it had one. It still has the verification problem: if only recalled patients were biopsied, missed cancers would stay invisible. Screening audits use follow-up of the cleared patients, catching cancers that surface later, precisely so the &ldquo;clear&rdquo; column can be scored (<a href="https://doi.org/10.2307/2530820" target="_blank" rel="noopener">Begg and Greenes 1983</a> treat the correction formally).</p></div>
+    <div data-m="ump"><span class="mlabel">Truth behind the plate: measured</span><p>The reference is the tracking system's measured pitch location against the rulebook zone. Every taken pitch gets checked, so there is no verification bias, and the reference's own error is small next to the umpire's. This is the one domain where the table below is close to a true validity measurement.</p></div>
+  </div>
+  <p>LLM evaluation has its own verification trap, and teams walk into it constantly. If humans only review the outputs the judge flagged as failing, they learn how often a flag is right, and nothing about the bad outputs the judge waved through. To measure misses, a random sample of the judge's passes has to go to humans too. The gold set exists so that every cell gets counted.</p>
+
+  <h2 id="matrix">Four cells</h2>
+  <figure class="fig"><button type="button" class="media" aria-label="Enlarge figure: a two by two confusion matrix. Rows are the reference truth, YES then NO. Columns are the judge's verdict, YES then NO. Cells: 48 true positives, 12 false negatives, 21 false positives, 119 true negatives. Row totals 60 and 140, column totals 69 and 131."><svg class="dg" viewBox="0 0 400 330" role="img" aria-label="Confusion matrix. Truth YES row: 48 judge YES, 12 judge NO. Truth NO row: 21 judge YES, 119 judge NO. Row totals 60 and 140; column totals 69 and 131."><title>The casebook confusion matrix: 48, 12, 21, 119.</title>
+    <g class="mx">
+      <text data-m="hire" x="255" y="22" class="t-def" font-size="11.5" text-anchor="middle">interviewer says</text>
+      <text data-m="review" x="255" y="22" class="t-def" font-size="11.5" text-anchor="middle">manager says</text>
+      <text data-m="wine" x="255" y="22" class="t-def" font-size="11.5" text-anchor="middle">judge says</text>
+      <text data-m="med" x="255" y="22" class="t-def" font-size="11.5" text-anchor="middle">radiologist says</text>
+      <text data-m="ump" x="255" y="22" class="t-def" font-size="11.5" text-anchor="middle">umpire calls</text>
+    </g>
+    <g class="mx">
+      <text data-m="hire" x="192" y="47" class="t-ink" font-size="12" text-anchor="middle" font-weight="600">hire</text>
+      <text data-m="review" x="192" y="47" class="t-ink" font-size="12" text-anchor="middle" font-weight="600">exceeds</text>
+      <text data-m="wine" x="192" y="47" class="t-ink" font-size="12" text-anchor="middle" font-weight="600">medal</text>
+      <text data-m="med" x="192" y="47" class="t-ink" font-size="12" text-anchor="middle" font-weight="600">recall</text>
+      <text data-m="ump" x="192" y="47" class="t-ink" font-size="12" text-anchor="middle" font-weight="600">strike</text>
+    </g>
+    <g class="mx">
+      <text data-m="hire" x="317" y="47" class="t-ink" font-size="12" text-anchor="middle" font-weight="600">no hire</text>
+      <text data-m="review" x="317" y="47" class="t-ink" font-size="12" text-anchor="middle" font-weight="600">meets</text>
+      <text data-m="wine" x="317" y="47" class="t-ink" font-size="12" text-anchor="middle" font-weight="600">no medal</text>
+      <text data-m="med" x="317" y="47" class="t-ink" font-size="12" text-anchor="middle" font-weight="600">clear</text>
+      <text data-m="ump" x="317" y="47" class="t-ink" font-size="12" text-anchor="middle" font-weight="600">ball</text>
+    </g>
+    <text x="122" y="47" class="t-dim" font-size="10.5" text-anchor="end">TRUTH &darr;</text>
+    <rect x="130" y="58" width="125" height="95" class="box-ok"/>
+    <rect x="255" y="58" width="125" height="95" class="box-crit"/>
+    <rect x="130" y="153" width="125" height="95" class="box-crit"/>
+    <rect x="255" y="153" width="125" height="95" class="box-ok"/>
+    <text x="192" y="108" class="t-ink" font-size="24" text-anchor="middle" font-weight="600">48</text>
+    <text x="192" y="128" class="t-ok" font-size="10.5" text-anchor="middle">true positive</text>
+    <text x="317" y="108" class="t-ink" font-size="24" text-anchor="middle" font-weight="600">12</text>
+    <text x="317" y="128" class="t-crit" font-size="10.5" text-anchor="middle">false negative</text>
+    <text x="192" y="203" class="t-ink" font-size="24" text-anchor="middle" font-weight="600">21</text>
+    <text x="192" y="223" class="t-crit" font-size="10.5" text-anchor="middle">false positive</text>
+    <text x="317" y="203" class="t-ink" font-size="24" text-anchor="middle" font-weight="600">119</text>
+    <text x="317" y="223" class="t-ok" font-size="10.5" text-anchor="middle">true negative</text>
+    <g class="mx">
+      <text data-m="hire" x="122" y="102" class="t-ink" font-size="11.5" text-anchor="end">should hire</text>
+      <text data-m="review" x="122" y="102" class="t-ink" font-size="11.5" text-anchor="end">truly exceeds</text>
+      <text data-m="wine" x="122" y="102" class="t-ink" font-size="11.5" text-anchor="end">panel: medal</text>
+      <text data-m="med" x="122" y="102" class="t-ink" font-size="11.5" text-anchor="end">cancer</text>
+      <text data-m="ump" x="122" y="102" class="t-ink" font-size="11.5" text-anchor="end">true strike</text>
+    </g>
+    <g class="mx">
+      <text data-m="hire" x="122" y="197" class="t-ink" font-size="11.5" text-anchor="end">should not hire</text>
+      <text data-m="review" x="122" y="197" class="t-ink" font-size="11.5" text-anchor="end">truly meets</text>
+      <text data-m="wine" x="122" y="197" class="t-ink" font-size="11.5" text-anchor="end">panel: no medal</text>
+      <text data-m="med" x="122" y="197" class="t-ink" font-size="11.5" text-anchor="end">no cancer</text>
+      <text data-m="ump" x="122" y="197" class="t-ink" font-size="11.5" text-anchor="end">true ball</text>
+    </g>
+    <text x="122" y="118" class="t-dim" font-size="10.5" text-anchor="end">60 items</text>
+    <text x="122" y="213" class="t-dim" font-size="10.5" text-anchor="end">140 items</text>
+    <text x="192" y="268" class="t-dim" font-size="10.5" text-anchor="middle">69 said YES</text>
+    <text x="317" y="268" class="t-dim" font-size="10.5" text-anchor="middle">131 said NO</text>
+    <text x="200" y="300" class="t-mid" font-size="10.5" text-anchor="middle">sensitivity 48/60 = 0.80 &middot; specificity 119/140 = 0.85</text>
+    <text x="200" y="318" class="t-mid" font-size="10.5" text-anchor="middle">precision 48/69 = 0.696 &middot; accuracy 167/200 = 0.835</text>
+  </svg></button><figcaption>Rows are the reference, columns are the judge. Green cells are agreements, red cells are the two kinds of mistake. <span class="mx"><span data-m="hire">The bottom row is the part real hiring never sees: rejected candidates get no outcome.</span><span data-m="review">The &ldquo;truth&rdquo; rows here are the calibration committee's ratings.</span><span data-m="wine">The &ldquo;truth&rdquo; rows here are the senior panel's verdicts.</span><span data-m="med">The &ldquo;truth&rdquo; rows come from biopsy and a year of follow-up.</span><span data-m="ump">The &ldquo;truth&rdquo; rows come from the tracking camera.</span></span> Worked in <a href="math.html#confusion">the appendix</a>.</figcaption></figure>
+  <p>Run the judge on the 200 gold items. Sixty are truly YES (they pass the policy) and 140 truly fail. The judge says pass on 69 of them. Cross the two and every item lands in one of four cells.</p>
+  <ul>
+    <li><b>True positive, 48.</b> Truly passes, judge says pass.</li>
+    <li><b>False negative, 12.</b> Truly passes, judge says fail. A good output blocked.</li>
+    <li><b>False positive, 21.</b> Truly fails, judge says pass. A bad output let through.</li>
+    <li><b>True negative, 119.</b> Truly fails, judge says fail.</li>
+  </ul>
+  <p>In the casebook those same four numbers are <span class="mx"><span data-m="hire">48 good candidates hired, 12 good ones turned away, 21 weak ones hired and 119 weak ones turned away</span><span data-m="review">48 strong employees rated exceeds, 12 strong ones rated meets, 21 solid-but-not-exceptional ones rated exceeds and 119 rated meets correctly</span><span data-m="wine">48 medal-worthy wines given a medal, 12 denied one, 21 ordinary wines given a medal and 119 correctly passed over</span><span data-m="med">48 cancers recalled, 12 cancers cleared, 21 healthy patients recalled and 119 healthy patients cleared</span><span data-m="ump">48 true strikes called strike, 12 called ball, 21 true balls called strike and 119 called ball</span></span>. Whether &ldquo;positive&rdquo; means good news depends on the domain: in medicine a positive is the alarming finding, in an LLM gate it is the output passing. Keep the definition of YES fixed for a whole analysis and write it at the top of the table, because swapping it silently swaps every metric below.</p>
+  <p>The matrix is the raw data. Every number on this page, and most numbers in every LLM-judge paper that reports agreement with humans on a binary label, is a ratio of these four cells. The rest is choosing which ratio answers the question being asked.</p>
+
+  <h2 id="vocab">Two vocabularies for the same cells</h2>
+  <p>Two fields worked out names for these ratios independently, and both sets are in daily use. Medicine reads the matrix by <b>rows</b>: given the truth, how often is the test right? Jacob Yerushalmy introduced the terms sensitivity and specificity in a 1947 study of how chest X-ray readers disagreed (<a href="https://doi.org/10.2307/4586294" target="_blank" rel="noopener">Yerushalmy 1947</a>; attribution per <a href="https://en.wikipedia.org/wiki/Sensitivity_and_specificity" target="_blank" rel="noopener">Wikipedia</a>). Information retrieval reads it from the <b>judge's side</b>: of the documents the system returned, how many were relevant, and of the relevant ones, how many did it return? That gave precision and recall, and C. J. van Rijsbergen's effectiveness measure is the ancestor of the F-score that combines them (<a href="https://en.wikipedia.org/wiki/F-score" target="_blank" rel="noopener">F-score</a>). ML inherited the retrieval names.</p>
+  <div class="scroll"><table class="kv">
+    <tr><th>Ratio</th><th>Medicine says</th><th>IR / ML says</th><th class="num">Casebook</th></tr>
+    <tr><td>TP / (TP + FN), across the YES row</td><td>sensitivity</td><td>recall, true positive rate</td><td class="num">48/60 = 0.80</td></tr>
+    <tr><td>TN / (TN + FP), across the NO row</td><td>specificity</td><td>true negative rate</td><td class="num">119/140 = 0.85</td></tr>
+    <tr><td>FP / (FP + TN)</td><td>1 &minus; specificity</td><td>false positive rate, fall-out</td><td class="num">21/140 = 0.15</td></tr>
+    <tr><td>TP / (TP + FP), down the YES column</td><td>positive predictive value</td><td>precision</td><td class="num">48/69 = 0.696</td></tr>
+    <tr><td>TN / (TN + FN), down the NO column</td><td>negative predictive value</td><td>(rarely named)</td><td class="num">119/131 = 0.908</td></tr>
+    <tr><td>(TP + TN) / all</td><td>accuracy</td><td>accuracy</td><td class="num">167/200 = 0.835</td></tr>
+    <tr><td>harmonic mean of precision and recall</td><td>(rarely used)</td><td>F1</td><td class="num">0.744</td></tr>
+  </table></div>
+  <p>The split is not an accident. A doctor evaluating a test cares about the test's behaviour on sick people and on healthy people separately, because those are properties of the test. A search engineer cares about what lands on the results page, because that is what users see, and has no good way even to count the true negatives (every irrelevant document on the web). F1 ignores the true-negative cell entirely for that reason. For an LLM judge both views matter: row rates describe the judge, column rates describe what a user of its verdicts experiences.</p>
+  <div class="mx case">
+    <div data-m="hire"><span class="mlabel">Reading the hiring table both ways</span><p>Sensitivity is the share of good candidates the interviewer recognises (0.80). Precision is the share of hires that work out (0.696), and it is the only number a real company can observe, since only hires get an outcome. A recruiter quoting &ldquo;70% of our hires succeed&rdquo; has told you precision and nothing about how many good people walked out the door.</p></div>
+    <div data-m="review"><span class="mlabel">Reading the review table both ways</span><p>Sensitivity is the share of committee-rated strong performers this manager also rated exceeds (0.80). Precision is how often this manager's &ldquo;exceeds&rdquo; survives the committee (0.696). Calibration meetings mostly see the second number, because inflated ratings are what get argued over; the strong performers a manager under-rated rarely come up.</p></div>
+    <div data-m="wine"><span class="mlabel">Reading the wine table both ways</span><p>Sensitivity is the share of panel-medal wines this judge also scored as medal-worthy (0.80). Precision is how often this judge's medal agrees with the panel's (0.696). A competition that only reviews disputed medals measures precision and never the medal wines a judge marked down.</p></div>
+    <div data-m="med"><span class="mlabel">Reading the screening table both ways</span><p>Sensitivity is the share of cancers the radiologist recalls (0.80), specificity the share of healthy patients cleared (0.85). Those describe the reader. Positive predictive value is what a recalled patient wants to know: given that I was called back, how likely is it to be cancer? Here 0.696; in a real screening population, far lower, for the reason in the base-rate section below.</p></div>
+    <div data-m="ump"><span class="mlabel">Reading the umpiring table both ways</span><p>Sensitivity is the share of true strikes called strike (0.80), specificity the share of true balls called ball (0.85). Precision is the share of called strikes that were really strikes (0.696). Umpire studies usually report the two row rates, or a single error rate, because both kinds of miss cost a team.</p></div>
+  </div>
+  <p><b>Accuracy's trap.</b> The casebook judge is right on 167 of 200 items, 0.835. That sounds good until it is set beside a judge that reads nothing and says NO every time: it gets all 140 truly-NO items right and scores 0.70. A judge that says YES every time scores 0.30, with perfect sensitivity and zero specificity. Accuracy mixes the two rows in proportion to how common each label is, so on a set that is mostly NO it mostly measures the NO row. When a vendor or a paper reports a single accuracy for a judge, the first question is what the always-majority baseline would score on the same set.</p>
+
+  <h2 id="youden">Youden's J: one number that ignores prevalence</h2>
+  <p>W. J. Youden, writing in the journal <i>Cancer</i> in 1950, wanted a single figure for rating a diagnostic test (<a href="https://doi.org/10.1002/1097-0142(1950)3:1%3C32::AID-CNCR2820030106%3E3.0.CO;2-3" target="_blank" rel="noopener">Youden 1950</a>). His index is the sum of the two row rates, less one:</p>
+  <div class="eq">J = sensitivity + specificity &minus; 1 = 0.80 + 0.85 &minus; 1 = 0.65</div>
+  <p>Written the other way, J is the true positive rate minus the false positive rate, 0.80 &minus; 0.15. It answers: how much more often does the judge say YES to truly-YES items than to truly-NO items? The same formula had appeared in <i>Science</i> in 1884, from C. S. Peirce, as a score for weather predictions (<a href="https://doi.org/10.1126/science.ns-4.93.453.b" target="_blank" rel="noopener">Peirce 1884</a>); meteorologists still call it the Peirce skill score (<a href="https://en.wikipedia.org/wiki/Youden%27s_J_statistic" target="_blank" rel="noopener">Youden's J statistic</a>).</p>
+  <ul>
+    <li><b>J = 0</b> means the judge says YES at the same rate whatever the truth is. The always-YES judge (1 + 0 &minus; 1), the always-NO judge (0 + 1 &minus; 1) and a coin flip all score exactly 0. Accuracy cannot tell these apart from a real judge on a lopsided set; J can.</li>
+    <li><b>J = 1</b> means no errors in either row.</li>
+    <li><b>J below 0</b> means the judge is anti-correlated with the truth: flip its labels and it becomes useful.</li>
+  </ul>
+  <p>J is built only from row rates, and each row rate is computed inside one truth group. So J does not change when the mix of YES and NO items changes, as long as the judge treats each kind the same way. That is a <b>feature</b>: a judge's J measured on a balanced gold set carries over to production traffic with a different pass rate, which accuracy and precision do not. It is also a <b>bug</b>, for two reasons. First, the people consuming the verdicts experience precision, and precision depends heavily on prevalence (next section). Second, J weighs a missed YES and a false YES as equally bad per row, which is a cost assumption nobody chose on purpose (the <a href="#cost">last section</a>).</p>
+  <p>The appendix works J and its confidence interval in <a href="math.html#youden">math.html#youden</a>. Note that 48/60 and 119/140 are small samples: the 95% interval on sensitivity alone runs from about 0.68 to 0.88 (<a href="math.html#ci">math.html#ci</a>), so two judges whose J differs by 0.05 on a set this size are not distinguishable.</p>
+
+  <h2 id="base-rate">The base rate decides what a YES means</h2>
+  <figure class="fig wide"><button type="button" class="media" aria-label="Enlarge figure: two panels. Top panel, prevalence 30 percent on 200 items: 60 truly YES and 140 truly NO; of the judge's 69 YES verdicts, 48 are right and 21 wrong, precision 0.696. Bottom panel, prevalence 5 percent on 1000 items: 50 truly YES and 950 truly NO; of the judge's 182.5 YES verdicts, 40 are right and 142.5 wrong, precision 0.219. Same judge both times."><svg class="dg" viewBox="0 0 720 262" role="img" aria-label="Same judge at two prevalences. At 30 percent, 48 of 69 YES verdicts are right, precision 0.696. At 5 percent, 40 of 182.5 YES verdicts are right, precision 0.219."><title>Same sensitivity and specificity, two prevalences, two very different precisions.</title>
+    <text x="20" y="26" class="t-def" font-size="11" text-anchor="start">PREVALENCE 30% &middot; 200 ITEMS (THE GOLD SET)</text>
+    <text x="700" y="26" class="t-ok" font-size="11.5" text-anchor="end" font-weight="600">precision 48/69 = 0.696</text>
+    <g class="mx">
+      <text data-m="hire" x="190" y="60" class="t-ink" font-size="11.5" text-anchor="end">all candidates</text>
+      <text data-m="review" x="190" y="60" class="t-ink" font-size="11.5" text-anchor="end">all employees</text>
+      <text data-m="wine" x="190" y="60" class="t-ink" font-size="11.5" text-anchor="end">all wines</text>
+      <text data-m="med" x="190" y="60" class="t-ink" font-size="11.5" text-anchor="end">all scans</text>
+      <text data-m="ump" x="190" y="60" class="t-ink" font-size="11.5" text-anchor="end">all pitches</text>
+    </g>
+    <rect x="200" y="42" width="144" height="26" class="box-off"/><text x="272" y="59" class="t-ink" font-size="11" text-anchor="middle">60 truly YES</text>
+    <rect x="344" y="42" width="336" height="26" class="box"/><text x="512" y="59" class="t-dim" font-size="11" text-anchor="middle">140 truly NO</text>
+    <g class="mx">
+      <text data-m="hire" x="190" y="96" class="t-ink" font-size="11.5" text-anchor="end">said hire</text>
+      <text data-m="review" x="190" y="96" class="t-ink" font-size="11.5" text-anchor="end">rated exceeds</text>
+      <text data-m="wine" x="190" y="96" class="t-ink" font-size="11.5" text-anchor="end">given a medal</text>
+      <text data-m="med" x="190" y="96" class="t-ink" font-size="11.5" text-anchor="end">called back</text>
+      <text data-m="ump" x="190" y="96" class="t-ink" font-size="11.5" text-anchor="end">called strike</text>
+    </g>
+    <rect x="200" y="78" width="334" height="26" class="box-ok"/><text x="367" y="95" class="t-ink" font-size="11" text-anchor="middle">48 right</text>
+    <rect x="534" y="78" width="146" height="26" class="box-crit"/><text x="607" y="95" class="t-ink" font-size="11" text-anchor="middle">21 wrong</text>
+    <text x="20" y="148" class="t-def" font-size="11" text-anchor="start">PREVALENCE 5% &middot; 1,000 ITEMS (A HARDER POPULATION)</text>
+    <text x="700" y="148" class="t-crit" font-size="11.5" text-anchor="end" font-weight="600">precision 40/182.5 = 0.219</text>
+    <g class="mx">
+      <text data-m="hire" x="190" y="182" class="t-ink" font-size="11.5" text-anchor="end">all candidates</text>
+      <text data-m="review" x="190" y="182" class="t-ink" font-size="11.5" text-anchor="end">all employees</text>
+      <text data-m="wine" x="190" y="182" class="t-ink" font-size="11.5" text-anchor="end">all wines</text>
+      <text data-m="med" x="190" y="182" class="t-ink" font-size="11.5" text-anchor="end">all scans</text>
+      <text data-m="ump" x="190" y="182" class="t-ink" font-size="11.5" text-anchor="end">all pitches</text>
+    </g>
+    <rect x="200" y="164" width="24" height="26" class="box-off"/><text x="212" y="181" class="t-ink" font-size="10.5" text-anchor="middle">50</text>
+    <rect x="224" y="164" width="456" height="26" class="box"/><text x="452" y="181" class="t-dim" font-size="11" text-anchor="middle">950 truly NO</text>
+    <g class="mx">
+      <text data-m="hire" x="190" y="218" class="t-ink" font-size="11.5" text-anchor="end">said hire</text>
+      <text data-m="review" x="190" y="218" class="t-ink" font-size="11.5" text-anchor="end">rated exceeds</text>
+      <text data-m="wine" x="190" y="218" class="t-ink" font-size="11.5" text-anchor="end">given a medal</text>
+      <text data-m="med" x="190" y="218" class="t-ink" font-size="11.5" text-anchor="end">called back</text>
+      <text data-m="ump" x="190" y="218" class="t-ink" font-size="11.5" text-anchor="end">called strike</text>
+    </g>
+    <rect x="200" y="200" width="105" height="26" class="box-ok"/><text x="252" y="217" class="t-ink" font-size="11" text-anchor="middle">40 right</text>
+    <rect x="305" y="200" width="375" height="26" class="box-crit"/><text x="492" y="217" class="t-ink" font-size="11" text-anchor="middle">142.5 wrong</text>
+    <text x="360" y="252" class="t-dim" font-size="10.5" text-anchor="middle">same judge both times: sensitivity 0.80, specificity 0.85, J 0.65</text>
+  </svg></button><figcaption>Each bar is scaled to 100% of its own row: the top bar of a panel is the whole population, the bottom bar is only the items the judge said YES to. The half item is an expected count (950 &times; 0.15). Worked in <a href="math.html#base-rate">math.html#base-rate</a>.</figcaption></figure>
+  <p>Take the same judge, with the same 0.80 sensitivity and 0.85 specificity, and point it at a population where only 5% of items are truly YES. On 1,000 items it catches 40 of the 50 YES items. It also says YES to 15% of the 950 NO items, which is 142.5 of them. Its YES pile holds 182.5 items and only 40 are right: <b>precision 0.219</b>. Nothing about the judge changed. Its YES went from being right seven times in ten to being right about one time in five, because there are now nineteen NO items for every YES item for it to make mistakes on.</p>
+  <p>This is the screening-test lesson that every medical student learns and every engineer relearns. A test that looks excellent on a balanced validation set becomes mostly false alarms when the condition is rare. It runs the other way for accuracy: at 5% prevalence the casebook judge's accuracy is 0.8475, and the always-NO judge's is 0.95. The useless judge wins on accuracy by a wide margin, which is the accuracy trap at full strength.</p>
+  <div class="mx case">
+    <div data-m="hire"><span class="mlabel">Base rates in hiring</span><p>A role that attracts hundreds of applicants for a handful of truly strong fits is a low-prevalence population. An interviewer with the casebook's 0.80 and 0.85, applied to everyone who applies rather than to a pre-screened shortlist, would produce a &ldquo;hire&rdquo; pile that is mostly weak candidates. Funnels exist partly to raise the base rate before the expensive judge sees anyone.</p></div>
+    <div data-m="review"><span class="mlabel">Base rates in reviews</span><p>If truly exceptional work is rare in a cycle, a manager with the casebook's 0.80 and 0.85 still rates a sizeable share of solid performers as exceeds, and most of the &ldquo;exceeds&rdquo; ratings that reach the committee are those. That is one reason rating distributions get pushed down in calibration: the committee is correcting for a judge whose false positive rate meets a low base rate.</p></div>
+    <div data-m="wine"><span class="mlabel">Base rates in wine</span><p>A competition flight of mostly ordinary wines is a low-prevalence population for &ldquo;truly medal-worthy&rdquo;. A judge with the casebook's error rates gives most of the medals in that flight to wines the senior panel would pass over. Medal counts look generous partly because false medals scale with the number of ordinary entries.</p></div>
+    <div data-m="med"><span class="mlabel">Base rates in screening</span><p>This is the home of the lesson. Cancer is found in a small fraction of screening mammograms, so even a reader with good sensitivity and specificity recalls many more healthy patients than sick ones, and most recalled patients turn out to be fine. The recall letter has to say so, and the radiologist's specificity matters as much as sensitivity because it multiplies a very large number of healthy patients.</p></div>
+    <div data-m="ump"><span class="mlabel">Base rates behind the plate</span><p>Umpiring is the one domain where prevalence does not swing much: a sizeable share of taken pitches are strikes, so the 5% scenario has no natural home here. The lesson still shows up in slices. Among pitches well off the plate, true strikes are rare, so the few strikes an umpire calls there are mostly mistakes.</p></div>
+  </div>
+  <p>For LLM judges the base rate moves all the time. A safety judge validated on a gold set built to be half violations will meet production traffic where violations are rare, and its flags will be mostly false alarms. A quality judge validated on last month's outputs meets a new model that fails less often, and its &ldquo;fail&rdquo; verdicts get less trustworthy as the model improves. Report the row rates (they travel) and recompute precision for the prevalence the judge will actually face (it does not).</p>
+
+  <h2 id="roc">Scores, thresholds and the ROC curve</h2>
+  <figure class="fig"><button type="button" class="media" aria-label="Enlarge figure: bar chart of the judge's 1 to 5 scores. Truly YES items: 2, 4, 6, 20 and 28 at scores 1 to 5. Truly NO items: 50, 38, 31, 14 and 7. A dashed line between scores 3 and 4 marks the cut at 4 or higher."><svg class="dg" viewBox="0 0 400 250" role="img" aria-label="Score distributions. Truly YES items by score 1 to 5: 2, 4, 6, 20, 28. Truly NO items: 50, 38, 31, 14, 7. Cut at 4 or higher."><title>How the judge's 1 to 5 scores split by truth.</title>
+    <rect x="20" y="10" width="12" height="10" class="box-off"/><text x="38" y="19" class="t-ink" font-size="10.5" text-anchor="start">truly YES (60)</text>
+    <rect x="150" y="10" width="12" height="10" class="box"/><text x="168" y="19" class="t-ink" font-size="10.5" text-anchor="start">truly NO (140)</text>
+    <line x1="30" y1="200" x2="390" y2="200" class="ln"/>
+    <rect x="58" y="194" width="20" height="6" class="box-off"/><rect x="82" y="50" width="20" height="150" class="box"/>
+    <text x="68" y="189" class="t-dim" font-size="10" text-anchor="middle">2</text><text x="92" y="45" class="t-dim" font-size="10" text-anchor="middle">50</text>
+    <rect x="128" y="188" width="20" height="12" class="box-off"/><rect x="152" y="86" width="20" height="114" class="box"/>
+    <text x="138" y="183" class="t-dim" font-size="10" text-anchor="middle">4</text><text x="162" y="81" class="t-dim" font-size="10" text-anchor="middle">38</text>
+    <rect x="198" y="182" width="20" height="18" class="box-off"/><rect x="222" y="107" width="20" height="93" class="box"/>
+    <text x="208" y="177" class="t-dim" font-size="10" text-anchor="middle">6</text><text x="232" y="102" class="t-dim" font-size="10" text-anchor="middle">31</text>
+    <rect x="268" y="140" width="20" height="60" class="box-off"/><rect x="292" y="158" width="20" height="42" class="box"/>
+    <text x="278" y="135" class="t-dim" font-size="10" text-anchor="middle">20</text><text x="302" y="153" class="t-dim" font-size="10" text-anchor="middle">14</text>
+    <rect x="338" y="116" width="20" height="84" class="box-off"/><rect x="362" y="179" width="20" height="21" class="box"/>
+    <text x="348" y="111" class="t-dim" font-size="10" text-anchor="middle">28</text><text x="372" y="174" class="t-dim" font-size="10" text-anchor="middle">7</text>
+    <line x1="255" y1="34" x2="255" y2="206" class="ln-off" stroke-dasharray="5 4"/>
+    <text x="262" y="44" class="t-off" font-size="10.5" text-anchor="start">cut &ge;4 &rarr; YES</text>
+    <text x="80" y="218" class="t-ink" font-size="11" text-anchor="middle">1</text><text x="150" y="218" class="t-ink" font-size="11" text-anchor="middle">2</text><text x="220" y="218" class="t-ink" font-size="11" text-anchor="middle">3</text><text x="290" y="218" class="t-ink" font-size="11" text-anchor="middle">4</text><text x="360" y="218" class="t-ink" font-size="11" text-anchor="middle">5</text>
+    <text x="210" y="240" class="t-dim" font-size="10.5" text-anchor="middle">judge's score</text>
+  </svg></button><figcaption>The two piles overlap; no cut separates them cleanly. Every cut trades one red cell for the other. <span class="mx"><span data-m="hire">The 1&ndash;5 is the interviewer's overall scorecard rating.</span><span data-m="review">The 1&ndash;5 is the manager's rating before it is collapsed to exceeds or meets.</span><span data-m="wine">The 1&ndash;5 is the judge's score sheet collapsed into five bands.</span><span data-m="med">The 1&ndash;5 is like a BI-RADS-style suspicion level.</span><span data-m="ump">Umpires give no score; the closest analogue is how wide the zone is drawn.</span></span></figcaption></figure>
+  <p>Most LLM judges are asked for a score, 1 to 5 or 1 to 10, and the pass/fail verdict is made by cutting the score: 4 or above passes. The cut is a choice, and each choice produces its own confusion matrix. The casebook judge's scores split like this:</p>
+  <div class="scroll"><table class="kv">
+    <tr><th>Score</th><th class="num">1</th><th class="num">2</th><th class="num">3</th><th class="num">4</th><th class="num">5</th></tr>
+    <tr><td>Truly YES (60)</td><td class="num">2</td><td class="num">4</td><td class="num">6</td><td class="num">20</td><td class="num">28</td></tr>
+    <tr><td>Truly NO (140)</td><td class="num">50</td><td class="num">38</td><td class="num">31</td><td class="num">14</td><td class="num">7</td></tr>
+  </table></div>
+  <p>Cut at &ge;4 and the YES pile is 20 + 28 = 48 true positives and 14 + 7 = 21 false positives: exactly the matrix above. Cut at &ge;5 and the judge becomes strict (TPR 0.467, FPR 0.05). Cut at &ge;3 and it becomes lenient (TPR 0.90, FPR 0.371). Plot every cut as a point with false positive rate across and true positive rate up, join the points, and that is the <b>receiver operating characteristic</b> curve. The name is from Second World War radar, where it described how well operators told aircraft from noise (<a href="https://en.wikipedia.org/wiki/Receiver_operating_characteristic" target="_blank" rel="noopener">ROC history</a>); psychophysics and then radiology took it over, and Swets argued for it as a common yardstick for diagnostic systems of every kind (<a href="https://doi.org/10.1126/science.3287615" target="_blank" rel="noopener">Swets 1988</a>).</p>
+  <figure class="fig"><button type="button" class="media" aria-label="Enlarge figure: ROC curve. False positive rate on the horizontal axis, true positive rate on the vertical. Points for cuts at 5, 4, 3, 2 and 1: (0.05, 0.467), (0.15, 0.80), (0.371, 0.90), (0.643, 0.967), (1, 1). A dashed diagonal marks chance. A vertical line at the cut of 4 shows J = 0.65 as the gap between the curve and the diagonal. The shaded area under the curve is 0.868."><svg class="dg" viewBox="0 0 400 370" role="img" aria-label="ROC curve through (0.05, 0.467), (0.15, 0.80), (0.371, 0.90), (0.643, 0.967) and (1, 1). J of 0.65 at the cut of 4 is the vertical gap to the diagonal. Area under the curve 0.868."><title>The casebook ROC curve with Youden's J marked at the best cut.</title>
+    <line x1="135" y1="20" x2="135" y2="320" class="grid"/><line x1="210" y1="20" x2="210" y2="320" class="grid"/><line x1="285" y1="20" x2="285" y2="320" class="grid"/>
+    <line x1="60" y1="245" x2="360" y2="245" class="grid"/><line x1="60" y1="170" x2="360" y2="170" class="grid"/><line x1="60" y1="95" x2="360" y2="95" class="grid"/>
+    <polygon points="60,320 75,180 105,80 171.3,50 252.9,30 360,20 360,320" fill="rgba(53,207,224,.10)" stroke="none"/>
+    <rect x="60" y="20" width="300" height="300" fill="none" class="ln"/>
+    <line x1="60" y1="320" x2="360" y2="20" class="ln" stroke-dasharray="4 4"/>
+    <polyline points="60,320 75,180 105,80 171.3,50 252.9,30 360,20" class="ln-def"/>
+    <line x1="105" y1="80" x2="105" y2="275" class="ln-off" stroke-dasharray="5 3"/>
+    <circle cx="75" cy="180" r="4" fill="var(--def)"/><circle cx="105" cy="80" r="6.5" fill="var(--off)"/><circle cx="171.3" cy="50" r="4" fill="var(--def)"/><circle cx="252.9" cy="30" r="4" fill="var(--def)"/><circle cx="360" cy="20" r="4" fill="var(--def)"/>
+    <text x="83" y="190" class="t-def" font-size="11" text-anchor="start">&ge;5</text>
+    <text x="114" y="80" class="t-off" font-size="11" text-anchor="start" font-weight="600">&ge;4 (the matrix)</text>
+    <text x="176" y="68" class="t-def" font-size="11" text-anchor="start">&ge;3</text>
+    <text x="252" y="48" class="t-def" font-size="11" text-anchor="middle">&ge;2</text>
+    <text x="352" y="38" class="t-def" font-size="11" text-anchor="end">&ge;1</text>
+    <text x="112" y="190" class="t-off" font-size="12" text-anchor="start" font-weight="600">J = 0.65</text>
+    <text x="112" y="206" class="t-dim" font-size="10" text-anchor="start">0.80 &minus; 0.15</text>
+    <text x="236" y="182" class="t-dim" font-size="10.5" text-anchor="start">chance, J = 0</text>
+    <text x="350" y="300" class="t-def" font-size="12" text-anchor="end" font-weight="600">AUC 0.868</text>
+    <text x="60" y="336" class="t-dim" font-size="10" text-anchor="middle">0</text><text x="210" y="336" class="t-dim" font-size="10" text-anchor="middle">0.5</text><text x="360" y="336" class="t-dim" font-size="10" text-anchor="middle">1</text>
+    <text x="52" y="324" class="t-dim" font-size="10" text-anchor="end">0</text><text x="52" y="174" class="t-dim" font-size="10" text-anchor="end">0.5</text><text x="52" y="24" class="t-dim" font-size="10" text-anchor="end">1</text>
+    <text x="210" y="356" class="t-ink" font-size="10.5" text-anchor="middle">false positive rate (1 &minus; specificity)</text>
+    <text x="22" y="170" class="t-ink" font-size="10.5" text-anchor="middle" transform="rotate(-90 22 170)">true positive rate (sensitivity)</text>
+  </svg></button><figcaption>Each point is one cut of the 1&ndash;5 score. The dashed diagonal is a judge that ignores the item. J at any point is the vertical gap from the point down to the diagonal; it is largest at &ge;4. Worked in <a href="math.html#roc">math.html#roc</a>.</figcaption></figure>
+  <p>The diagonal is the line of a judge that knows nothing: whatever share of NO items it says YES to, it says YES to the same share of YES items. Every point's height above that diagonal is its true positive rate minus its false positive rate, which is Youden's J. So J has a picture: the vertical gap between the curve and the chance line. Across the five cuts J is 0.417, <b>0.65</b>, 0.529, 0.324 and 0, peaking at &ge;4. Choosing the cut that maximises J is the textbook rule for a diagnostic threshold, and it is a reasonable default when nothing is known about costs.</p>
+  <p><b>The area under the curve.</b> The shaded area is the AUC, 0.868 here. It has a plain meaning that makes it more than a geometry fact: pick one truly-YES item and one truly-NO item at random; the AUC is the probability the YES item gets the higher score, with ties counted as half. Hanley and McNeil set out that reading, and its equivalence to the Wilcoxon rank statistic, for radiologists in 1982 (<a href="https://doi.org/10.1148/radiology.143.1.7063747" target="_blank" rel="noopener">Hanley and McNeil 1982</a>). On the casebook the YES item scores strictly higher 81.3% of the time and ties 10.9% of the time; 0.813 + 0.109/2 = 0.868. On a five-point scale ties are common, which is one quiet reason coarse judge scales lose discrimination. An AUC of 0.5 is the diagonal, a judge that cannot rank at all; 1.0 is perfect separation. See <a href="math.html#auc">math.html#auc</a>.</p>
+  <p>AUC summarises the judge across every threshold, which is what makes it good for comparing two judge prompts before deciding how to use either. It is not what gets deployed. A judge in production runs at one cut, and two judges with the same AUC can have very different behaviour at the cut that matters (one strong at the strict end, one at the lenient end).</p>
+  <div class="mx case">
+    <div data-m="hire"><span class="mlabel">The threshold in hiring</span><p>A debrief that hires anyone with an average of 3 or more is the lenient end of the curve; one that requires a 4 from every interviewer is the strict end. Raising the bar during a hiring freeze moves the company down the curve to the left: fewer bad hires, more good people turned away. The interviewer's skill (the curve) has not changed; only the operating point has.</p></div>
+    <div data-m="review"><span class="mlabel">The threshold in reviews</span><p>Where the line between a 3 and a 4 sits is a threshold on the manager's underlying judgement. An organisation that tells managers &ldquo;exceeds should be rare&rdquo; is moving every manager to a stricter point on their own curve, trading false &ldquo;exceeds&rdquo; for missed strong performers.</p></div>
+    <div data-m="wine"><span class="mlabel">The threshold in wine</span><p>Medal cut-offs on a score sheet are thresholds. A competition that lowers the bronze line moves its judges to the right on the curve: more true medal wines rewarded, and many more ordinary wines rewarded with them.</p></div>
+    <div data-m="med"><span class="mlabel">The threshold in screening</span><p>Radiology is where ROC analysis became standard, because readers' confidence levels give natural cut points. A reader who recalls every &ldquo;probably benign&rdquo; finding sits far to the right on the curve; a reader who recalls only &ldquo;suspicious&rdquo; findings sits further left. Two radiologists can have the same curve and different recall rates purely because they chose different points.</p></div>
+    <div data-m="ump"><span class="mlabel">The threshold behind the plate</span><p>An umpire has no score to cut, but a zone drawn wide is a lenient threshold (more true strikes called, more balls called strikes too) and a zone drawn tight is a strict one. Pitch tracking lets analysts see each umpire's operating point directly, which is how research such as <a href="https://doi.org/10.1257/aer.101.4.1410" target="_blank" rel="noopener">Parsons et al. 2011</a> could measure calls shifting by context.</p></div>
+  </div>
+
+  <h2 id="cost">Choosing the threshold by cost, not by J</h2>
+  <blockquote class="q">A single pass rate hides the question I care about: which mistakes, and what do they cost?<span class="cite">Igor Dvorkin, <a href="https://idvork.in/ai-testing#confusion-matrix-precision-and-recall" target="_blank" rel="noopener">AI testing: confusion matrix, precision and recall</a></span></blockquote>
+  <p>Maximising J is a cost assumption in disguise. The expected cost of a cut is (cost of a miss) &times; (number of misses) + (cost of a false YES) &times; (number of false YESes). Working through the algebra, the J-maximising cut is the cheapest one only when the cost of a miss times the share of YES items equals the cost of a false YES times the share of NO items. On the casebook set (60 YES, 140 NO) that means J quietly assumes a miss costs 140/60, about 2.3 times, a false YES. Nobody chose that ratio. The table puts three explicit cost ratios on the same five cuts (the costs are illustrative; the counts are the casebook's):</p>
+  <div class="scroll"><table class="kv">
+    <tr><th>Cut</th><th class="num">Misses (FN)</th><th class="num">False YES (FP)</th><th class="num">Equal costs</th><th class="num">Miss 20&times; worse</th><th class="num">False YES 5&times; worse</th></tr>
+    <tr><td>&ge;5</td><td class="num">32</td><td class="num">7</td><td class="num">39</td><td class="num">647</td><td class="num"><span class="hi">67</span></td></tr>
+    <tr><td>&ge;4</td><td class="num">12</td><td class="num">21</td><td class="num"><span class="hi">33</span></td><td class="num">261</td><td class="num">117</td></tr>
+    <tr><td>&ge;3</td><td class="num">6</td><td class="num">52</td><td class="num">58</td><td class="num">172</td><td class="num">266</td></tr>
+    <tr><td>&ge;2</td><td class="num">2</td><td class="num">90</td><td class="num">92</td><td class="num"><span class="hi">130</span></td><td class="num">452</td></tr>
+    <tr><td>&ge;1</td><td class="num">0</td><td class="num">140</td><td class="num">140</td><td class="num">140</td><td class="num">700</td></tr>
+  </table></div>
+  <p>Same judge, same curve, three different best cuts. With equal costs the cheapest cut is &ge;4, which here happens to be J's choice too. When a miss is twenty times worse, the cheapest cut drops to &ge;2 and the judge accepts 90 false YESes to avoid 10 more misses. When a false YES is five times worse, it climbs to &ge;5. The cost ratio, not the judge, decides where to sit, and the ratio has to come from whoever owns the consequences.</p>
+  <p>For an LLM judge used as a gate, decide first which error is expensive. A safety or policy gate where YES means &ldquo;passes&rdquo; should usually fear the false YES, the bad output let through, and run strict. A judge that filters training data for quality may fear the opposite: throwing away good examples costs less than a few bad ones, or more, depending on how scarce the data is. A judge that only ranks candidates for a human to review can run lenient, because a person catches the false YESes. Igor's <a href="https://idvork.in/ai-testing#confusion-matrix-precision-and-recall" target="_blank" rel="noopener">confusion-matrix section</a> makes the same move on a made-up triage classifier: price each kind of mistake, then pick the metric per class.</p>
+  <div class="mx case">
+    <div data-m="hire"><span class="mlabel">What each mistake costs in hiring</span><p>The usual folk wisdom says a bad hire costs far more than a missed good one: months of lost output, a team dragged down, a painful exit. Companies that believe it run the interviewer strict, the &ldquo;false YES 5&times; worse&rdquo; column. A company that cannot fill roles at all may reasonably run looser. Either way, the choice is a cost judgement that should be made out loud.</p></div>
+    <div data-m="review"><span class="mlabel">What each mistake costs in reviews</span><p>A false &ldquo;exceeds&rdquo; spends a limited reward budget on the wrong person and dilutes the rating's meaning. A missed strong performer may leave. Which is worse depends on how scarce the budget is and how replaceable the person is, which is why calibration committees argue about the cut line, not about each manager's eye.</p></div>
+    <div data-m="wine"><span class="mlabel">What each mistake costs in wine</span><p>A false medal inflates the competition's medals and erodes what a sticker on a bottle means; a missed medal costs one producer a sale. Competitions with a reputation to protect run strict; competitions that make money from entry fees have a reason to drift lenient. The threshold reflects the incentive, not only the palate.</p></div>
+    <div data-m="med"><span class="mlabel">What each mistake costs in screening</span><p>A missed cancer can cost a life. A false recall costs anxiety, an extra appointment and sometimes a biopsy. Screening programmes therefore accept many false recalls for each cancer caught, the &ldquo;miss 20&times; worse&rdquo; column, while auditing recall rates so the lenient cut does not drift into recalling everyone.</p></div>
+    <div data-m="ump"><span class="mlabel">What each mistake costs behind the plate</span><p>Umpiring is the domain with roughly symmetric costs: a strike called a ball hurts the pitcher as much as a ball called a strike hurts the batter, and the rulebook takes no side. That is why the right target for an umpire is close to the J cut, minimising total errors, and why a zone that drifts in one direction is called bias rather than policy.</p></div>
+  </div>
+
+  <div class="callout"><b>Carry this away.</b> Validity is a two-by-two table against a reference, and every metric is a ratio of its four cells. Row rates (sensitivity, specificity, Youden's J) describe the judge and travel across populations; column rates (precision) describe what users of its verdicts experience and collapse when YES gets rare. A score-emitting judge has a whole ROC curve; AUC compares judges, the deployed cut should be chosen by what each mistake costs. And the table is only as good as its truth column, so say where that came from, and count the cells the judge's own verdict would hide.</div>
+
+  <h2 id="can-say">What you can say now</h2>
+  <ul>
+    <li>A judge's validity is measured by a confusion matrix against a reference set; for an LLM that is a human-labelled gold set, and the judge cannot be shown to be better than its labels.</li>
+    <li>Sensitivity/specificity and recall/precision are two names for ratios of the same four cells: medicine reads across the truth rows, retrieval reads down the judge's columns.</li>
+    <li>Accuracy is dominated by the common label; always report what an always-majority judge would score (0.70 on the casebook set, 0.95 at 5% prevalence).</li>
+    <li>Youden's J = sensitivity + specificity &minus; 1 is 0 for any judge that ignores the item and 1 for a perfect one, and it does not move with prevalence; precision does (0.696 at 30%, 0.219 at 5% for the same judge).</li>
+    <li>Thresholding a score traces an ROC curve; J is the vertical gap to the diagonal, and AUC is the chance a random YES item outscores a random NO item (0.868 here).</li>
+    <li>Pick the operating threshold from explicit error costs; maximising J silently assumes a cost ratio set by the gold set's class balance.</li>
+    <li>Verification bias, checking only what the judge flagged (or hired), leaves cells empty and makes recall unmeasurable; sample the judge's passes for review too.</li>
+  </ul>
+
+  <h2 id="sources">Sources</h2>
+  <ul class="readings">
+    <li><a href="https://doi.org/10.2307/4586294" target="_blank" rel="noopener">Yerushalmy 1947, Statistical problems in assessing methods of medical diagnosis, with special reference to X-ray techniques</a> &middot; reader variability; the terms sensitivity and specificity (attribution per <a href="https://en.wikipedia.org/wiki/Sensitivity_and_specificity" target="_blank" rel="noopener">Wikipedia</a>).</li>
+    <li><a href="https://doi.org/10.1002/1097-0142(1950)3:1%3C32::AID-CNCR2820030106%3E3.0.CO;2-3" target="_blank" rel="noopener">Youden 1950, Index for rating diagnostic tests</a> &middot; the J statistic.</li>
+    <li><a href="https://doi.org/10.1126/science.ns-4.93.453.b" target="_blank" rel="noopener">Peirce 1884, The numerical measure of the success of predictions</a> &middot; the same formula, for weather forecasts.</li>
+    <li><a href="https://en.wikipedia.org/wiki/Youden%27s_J_statistic" target="_blank" rel="noopener">Youden's J statistic (Wikipedia)</a> &middot; range, ROC height interpretation, Peirce skill score.</li>
+    <li><a href="https://doi.org/10.1148/radiology.143.1.7063747" target="_blank" rel="noopener">Hanley and McNeil 1982, The meaning and use of the area under a ROC curve</a> &middot; AUC as a ranking probability.</li>
+    <li><a href="https://doi.org/10.1126/science.3287615" target="_blank" rel="noopener">Swets 1988, Measuring the accuracy of diagnostic systems</a> &middot; ROC as a common yardstick across fields.</li>
+    <li><a href="https://en.wikipedia.org/wiki/Receiver_operating_characteristic" target="_blank" rel="noopener">Receiver operating characteristic (Wikipedia)</a> &middot; radar origin of the name.</li>
+    <li><a href="https://doi.org/10.2307/2530820" target="_blank" rel="noopener">Begg and Greenes 1983, Assessment of diagnostic tests when disease verification is subject to selection bias</a> &middot; verification bias and its correction.</li>
+    <li><a href="https://en.wikipedia.org/wiki/F-score" target="_blank" rel="noopener">F-score (Wikipedia)</a> &middot; van Rijsbergen's effectiveness measure and F1.</li>
+    <li><a href="https://doi.org/10.1017/s1931436100001152" target="_blank" rel="noopener">Hodgson 2008, An examination of judge reliability at a major U.S. wine competition</a> &middot; why a wine panel is a noisy reference.</li>
+    <li><a href="https://doi.org/10.1257/aer.101.4.1410" target="_blank" rel="noopener">Parsons, Sulaeman, Yates and Hamermesh 2011, Strike Three</a> &middot; umpire calls measured against pitch tracking.</li>
+    <li><a href="https://idvork.in/ai-testing#confusion-matrix-precision-and-recall" target="_blank" rel="noopener">Igor Dvorkin, AI testing: confusion matrix, precision and recall</a> &middot; pricing each mistake and choosing the metric per class.</li>
+    <li><a href="https://idvork.in/subjective-evals#5-grade-the-grader" target="_blank" rel="noopener">Igor Dvorkin, Evals with no right answer: grade the grader</a> &middot; where this unit sits in the recipe.</li>
+  </ul>
+
+  <div class="callout">Next: <a class="lnk" href="p06.html">How judges go wrong I: what they are shown</a> &middot; Back to <a class="lnk" href="../index.html#measuring">the map</a>.</div>
+</main>
+<footer>Original explanation, compiled November 2026. Every example switches with the metaphor menu; the arithmetic never does. Part of <a href="../index.html">LLM Judges, mapped</a>.</footer>
+<script src="../fig.js" defer></script>
+</body>
+</html>
