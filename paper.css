@@ -280,3 +280,5 @@ html[data-metaphor="med"] .rosetta [data-col="med"],html[data-metaphor="ump"] .r
 table.rosetta th button{all:unset;cursor:pointer;color:inherit;border-bottom:1px dashed var(--ink-dim)}
 table.rosetta th button:hover{color:var(--off-bright)}
 table.rosetta td:first-child{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--ink-dim);white-space:nowrap}
+/* floated figures sit above positioned list items so they stay clickable */
+figure.fig{position:relative;z-index:1}
