@@ -5,3 +5,5 @@ A mini-course on LLM judges: judging and grading. Nine units and a maths appendi
 Live: https://idvorkin-ai-tools.github.io/llm-judges-field-map/
 
 Static HTML. `paper.css` is shared; `site.js` (loaded in every `<head>`) sets the chosen metaphor on `<html>` and adds the menu; `fig.js` enlarges figures. Each switching slot is an element with class `mx` holding one `[data-m]` child per domain (`hire`, `review`, `wine`, `med`, `ump`); `tools/check_variants.py` lints that every slot has all five.
+
+Interactive pieces (term boxes with Technical / ELI5 switches, and slider widgets) are documented in [`docs/INTERACTIVE.md`](docs/INTERACTIVE.md). Checks: `python3 tools/check_variants.py` and `node --test tools/`.

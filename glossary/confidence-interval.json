@@ -1,0 +1,7 @@
+{
+ "term": "Confidence interval",
+ "plain": "The range the true number probably sits in, given how few items were checked.",
+ "eli5": "We counted only some of the jellybeans, so the real number is somewhere in this range.",
+ "technical": "An interval procedure that covers the true parameter in the stated share (e.g. 95%) of repeated samples. For proportions prefer Wilson; for kappa use the SE approximation or the bootstrap. Width shrinks as 1/√n.",
+ "formula": "Wilson: (p̂ + z²/2n ± z√(p̂(1−p̂)/n + z²/4n²)) / (1 + z²/n)"
+}

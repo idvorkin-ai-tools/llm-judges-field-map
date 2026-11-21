@@ -1,0 +1,7 @@
+{
+ "term": "Fleiss' kappa",
+ "plain": "Kappa for a panel of three or more judges on every item.",
+ "eli5": "The same agreement score, but for a whole group of friends instead of two.",
+ "technical": "Generalises Scott's pi to a fixed number of raters per item: mean pairwise agreement per item against chance pair agreement from the pooled category rates (Fleiss 1971).",
+ "formula": "κ = (P̄ − P̄<sub>e</sub>) / (1 − P̄<sub>e</sub>)"
+}

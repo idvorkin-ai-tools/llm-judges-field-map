@@ -1,0 +1,6 @@
+{
+ "term": "Goodhart's law",
+ "plain": "Once people aim at a score, the score stops measuring what it used to.",
+ "eli5": "If you get a sticker for every page read, kids start reading very short pages.",
+ "technical": "Goodhart (1975), in Strathern's wording: “When a measure becomes a target, it ceases to be a good measure.” In ML: optimisation against a proxy judge exploits its errors (reward hacking; Gao et al. 2022)."
+}

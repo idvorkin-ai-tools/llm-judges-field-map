@@ -1,0 +1,6 @@
+{
+ "term": "Reliability",
+ "plain": "Whether a judge gives the same answer again and again, whether or not the answer is right.",
+ "eli5": "A scale that shows the same weight every time you step on it.",
+ "technical": "Consistency of a measurement under repetition (test–retest, inter-rater, internal consistency). Necessary but not sufficient for validity."
+}

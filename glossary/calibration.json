@@ -1,0 +1,6 @@
+{
+ "term": "Calibration",
+ "plain": "Whether a judge's confidence matches how often it is actually right.",
+ "eli5": "When the weather person says 70% rain, it should rain on about 7 of 10 such days.",
+ "technical": "Agreement between predicted probabilities and observed frequencies (reliability diagrams, expected calibration error). On this site also: aligning human raters to the policy on a shared calibration set."
+}

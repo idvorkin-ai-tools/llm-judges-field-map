@@ -183,6 +183,8 @@
     <text x="360" y="252" class="t-dim" font-size="10.5" text-anchor="middle">same judge both times: sensitivity 0.80, specificity 0.85, J 0.65</text>
   </svg></button><figcaption>Each bar is scaled to 100% of its own row: the top bar of a panel is the whole population, the bottom bar is only the items the judge said YES to. The half item is an expected count (950 &times; 0.15). Worked in <a href="math.html#base-rate">math.html#base-rate</a>.</figcaption></figure>
   <p>Take the same judge, with the same 0.80 sensitivity and 0.85 specificity, and point it at a population where only 5% of items are truly YES. On 1,000 items it catches 40 of the 50 YES items. It also says YES to 15% of the 950 NO items, which is 142.5 of them. Its YES pile holds 182.5 items and only 40 are right: <b>precision 0.219</b>. Nothing about the judge changed. Its YES went from being right seven times in ten to being right about one time in five, because there are now nineteen NO items for every YES item for it to make mistakes on.</p>
+  <p class="lab-try"><b>Try this</b>Keep the judge fixed and lower the prevalence: J never moves, but the YES pile fills with wrong calls and the always-NO judge overtakes on accuracy.</p>
+  <div class="lab" data-lab="baserate"></div>
   <p>This is the screening-test lesson that every medical student learns and every engineer relearns. A test that looks excellent on a balanced validation set becomes mostly false alarms when the condition is rare. It runs the other way for accuracy: at 5% prevalence the casebook judge's accuracy is 0.8475, and the always-NO judge's is 0.95. The useless judge wins on accuracy by a wide margin, which is the accuracy trap at full strength.</p>
   <div class="mx case">
     <div data-m="hire"><span class="mlabel">Base rates in hiring</span><p>A role that attracts hundreds of applicants for a handful of truly strong fits is a low-prevalence population. An interviewer with the casebook's 0.80 and 0.85, applied to everyone who applies rather than to a pre-screened shortlist, would produce a &ldquo;hire&rdquo; pile that is mostly weak candidates. Funnels exist partly to raise the base rate before the expensive judge sees anyone.</p></div>
@@ -244,6 +246,8 @@
     <text x="22" y="170" class="t-ink" font-size="10.5" text-anchor="middle" transform="rotate(-90 22 170)">true positive rate (sensitivity)</text>
   </svg></button><figcaption>Each point is one cut of the 1&ndash;5 score. The dashed diagonal is a judge that ignores the item. J at any point is the vertical gap from the point down to the diagonal; it is largest at &ge;4. Worked in <a href="math.html#roc">math.html#roc</a>.</figcaption></figure>
   <p>The diagonal is the line of a judge that knows nothing: whatever share of NO items it says YES to, it says YES to the same share of YES items. Every point's height above that diagonal is its true positive rate minus its false positive rate, which is Youden's J. So J has a picture: the vertical gap between the curve and the chance line. Across the five cuts J is 0.417, <b>0.65</b>, 0.529, 0.324 and 0, peaking at &ge;4. Choosing the cut that maximises J is the textbook rule for a diagnostic threshold, and it is a reasonable default when nothing is known about costs.</p>
+  <p class="lab-try"><b>Try this</b>Slide the threshold and watch the point walk along the curve; J is the orange gap to the diagonal. Then switch to smooth scores and pull the two piles apart or together.</p>
+  <div class="lab" data-lab="roc"></div>
   <p><b>The area under the curve.</b> The shaded area is the AUC, 0.868 here. It has a plain meaning that makes it more than a geometry fact: pick one truly-YES item and one truly-NO item at random; the AUC is the probability the YES item gets the higher score, with ties counted as half. Hanley and McNeil set out that reading, and its equivalence to the Wilcoxon rank statistic, for radiologists in 1982 (<a href="https://doi.org/10.1148/radiology.143.1.7063747" target="_blank" rel="noopener">Hanley and McNeil 1982</a>). On the casebook the YES item scores strictly higher 81.3% of the time and ties 10.9% of the time; 0.813 + 0.109/2 = 0.868. On a five-point scale ties are common, which is one quiet reason coarse judge scales lose discrimination. An AUC of 0.5 is the diagonal, a judge that cannot rank at all; 1.0 is perfect separation. See <a href="math.html#auc">math.html#auc</a>.</p>
   <p>AUC summarises the judge across every threshold, which is what makes it good for comparing two judge prompts before deciding how to use either. It is not what gets deployed. A judge in production runs at one cut, and two judges with the same AUC can have very different behaviour at the cut that matters (one strong at the strict end, one at the lenient end).</p>
   <div class="mx case">
@@ -308,6 +312,10 @@
   <div class="callout">Next: <a class="lnk" href="p06.html">How judges go wrong I: what they are shown</a> &middot; Back to <a class="lnk" href="../index.html#measuring">the map</a>.</div>
 </main>
 <footer>Original explanation, compiled November 2026. Every example switches with the metaphor menu; the arithmetic never does. Part of <a href="../index.html">LLM Judges, mapped</a>.</footer>
+<script src="../lab.js" defer></script>
+<script src="../widgets.js" defer></script>
+<script src="../widgets/roc.js" defer></script>
+<script src="../widgets/baserate.js" defer></script>
 <script src="../fig.js" defer></script>
 <!-- Private comments mode, inert unless ?annotate=1 (see assets/annotate.js in idvorkin-ai-tools.github.io) -->
 <script src="https://idvorkin-ai-tools.github.io/assets/annotate.js" defer></script>

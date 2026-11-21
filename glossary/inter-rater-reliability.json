@@ -1,0 +1,6 @@
+{
+ "term": "Inter-rater reliability",
+ "plain": "How consistently different judges give the same item the same answer.",
+ "eli5": "Do two referees call the same play the same way?",
+ "technical": "Consistency between raters on the same items, measured with a chance-corrected statistic (kappa, alpha, ICC). Needs no ground truth; bounds how valid any one rater can be shown to be."
+}

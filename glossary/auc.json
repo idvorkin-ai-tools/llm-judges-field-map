@@ -1,0 +1,7 @@
+{
+ "term": "AUC",
+ "plain": "The chance that the judge scores a random real YES item above a random real NO item.",
+ "eli5": "Pick one good apple and one bad apple; how often does the judge give the good one the higher mark?",
+ "technical": "Area under the ROC curve; equals the Mann–Whitney probability P(score<sub>YES</sub> > score<sub>NO</sub>) with ties counted half (Hanley and McNeil 1982). Threshold-free and blind to calibration.",
+ "formula": "AUC = (wins + ties/2) / (n<sub>YES</sub>·n<sub>NO</sub>)"
+}

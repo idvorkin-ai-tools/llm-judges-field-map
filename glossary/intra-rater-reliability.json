@@ -1,0 +1,6 @@
+{
+ "term": "Intra-rater reliability",
+ "plain": "How consistently one judge gives the same answer when shown the same item again.",
+ "eli5": "If you ask the same friend twice, do they give the same answer?",
+ "technical": "Test–retest agreement of a single rater (or a sampled LLM) on repeated, blinded presentations of the same items. It caps the rater's agreement with anyone else."
+}

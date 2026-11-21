@@ -1,0 +1,7 @@
+{
+ "term": "Percent agreement",
+ "plain": "How often two judges gave the same answer, out of all the items they both judged.",
+ "eli5": "Two friends sort the same toys; count how many toys they put in the same box.",
+ "technical": "Observed agreement p<sub>o</sub>: the share of items on the diagonal of the two raters' contingency table. Includes agreement that would happen by chance.",
+ "formula": "p<sub>o</sub> = (a + d) / n"
+}

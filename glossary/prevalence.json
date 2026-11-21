@@ -1,0 +1,7 @@
+{
+ "term": "Prevalence",
+ "plain": "How common the YES answer really is among the items being judged.",
+ "eli5": "How many of the apples in the basket are actually bad ones.",
+ "technical": "The proportion π of items whose true (or, for agreement, typical) label is positive. Kappa, precision and accuracy all move with it; sensitivity and specificity do not.",
+ "formula": "π = (TP + FN) / n"
+}

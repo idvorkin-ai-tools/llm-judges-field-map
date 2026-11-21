@@ -1,0 +1,6 @@
+{
+ "term": "Marginal totals",
+ "plain": "The row and column totals at the edges of the table: how often each judge says YES overall.",
+ "eli5": "Counting how many times each friend said “yes”, no matter what the other said.",
+ "technical": "The marginal distributions of the contingency table; chance agreement in kappa and the expected cells in chi-squared tests are computed from them alone."
+}

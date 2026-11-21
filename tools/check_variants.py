@@ -7,11 +7,17 @@ Every element with class "mx" must have, as direct children, exactly one
 [data-m] element per domain (hire, review, wine, med, ump). No [data-m]
 may sit outside an .mx parent. Pages under parts/ must link paper.css and
 site.js in <head>, carry no <style> block and no leftover {{ slots, and
-load fig.js if they have a figure. Exit 1 on any problem. Stdlib only.
+load fig.js if they have a figure. Term boxes and widgets (docs/INTERACTIVE.md):
+every data-term must have glossary/<id>.json with term, plain, eli5 and
+technical, appear once per page, and the page must load glossary.js; every
+data-lab must have widgets/<name>.js loaded after lab.js and widgets.js.
+Exit 1 on any problem. Stdlib only.
 """
 
 import glob
+import json
 import os
+import re
 import sys
 from html.parser import HTMLParser
 
@@ -59,6 +65,42 @@ class P(HTMLParser):
                 return
 
 
+GLOSS_KEYS = ("term", "plain", "eli5", "technical")
+
+
+def check_interactive(root, rel, s):
+    errs = []
+    terms = re.findall(r'data-term="([^"]+)"', s)
+    for t in sorted(set(terms)):
+        if terms.count(t) > 1:
+            errs.append(f"data-term={t!r} used {terms.count(t)} times; box only the first use")
+        g = os.path.join(root, "glossary", t + ".json")
+        if not os.path.exists(g):
+            errs.append(f"data-term={t!r} has no glossary/{t}.json")
+            continue
+        try:
+            d = json.load(open(g, encoding="utf-8"))
+        except ValueError as e:
+            errs.append(f"glossary/{t}.json is not valid JSON: {e}")
+            continue
+        for k in GLOSS_KEYS:
+            if not str(d.get(k, "")).strip():
+                errs.append(f"glossary/{t}.json missing {k!r}")
+    if terms and "glossary.js" not in s:
+        errs.append("has data-term but does not load glossary.js")
+    labs = re.findall(r'data-lab="([^"]+)"', s)
+    if labs:
+        for need in ("lab.js", "widgets.js"):
+            if not re.search(r'src="[^"]*(?<![\w/])' + re.escape(need) + '"', s) and f'/{need}"' not in s:
+                errs.append(f"has a widget but does not load {need}")
+    for name in sorted(set(labs)):
+        if not os.path.exists(os.path.join(root, "widgets", name + ".js")):
+            errs.append(f"data-lab={name!r} has no widgets/{name}.js")
+        if f"widgets/{name}.js" not in s:
+            errs.append(f"data-lab={name!r} but the page does not load widgets/{name}.js")
+    return errs
+
+
 def main():
     root = sys.argv[1] if len(sys.argv) > 1 else os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     bad = 0
@@ -81,6 +123,7 @@ def main():
             errs.append("leftover {{ slot")
         if "figure class=\"fig" in s and "fig.js" not in s:
             errs.append("has figures but does not load fig.js")
+        errs += check_interactive(root, rel, s)
         n = s.count('class="mx')
         print(f"{'FAIL' if errs else 'ok  '} {rel}: {n} .mx slots")
         for e in errs:
