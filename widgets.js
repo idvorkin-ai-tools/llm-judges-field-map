@@ -78,8 +78,10 @@
   }
   // Deferred scripts run in document order before DOMContentLoaded, so every
   // widgets/<name>.js has registered by the time this fires.
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initAll);
-  else setTimeout(initAll, 0);
+  // readyState is already "interactive" while deferred scripts run, so wait for
+  // DOMContentLoaded unless the page has fully loaded; load is a backstop (initAll is idempotent).
+  if (document.readyState === 'complete') setTimeout(initAll, 0);
+  else { document.addEventListener('DOMContentLoaded', initAll); window.addEventListener('load', initAll); }
   window.LLMJWidgets = {
     KEYS: KEYS, W: W, mx: mx, w: w, smx: smx, t: t, f2: f2, f3: f3, cnt: cnt, pct: pct,
     slider: slider, stat: stat, presets: presets, $: $, uid: uid, register: register, init: initAll
