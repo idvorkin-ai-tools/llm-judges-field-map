@@ -1,0 +1,6 @@
+{
+ "term": "Authority bias",
+ "plain": "A judge giving more credit to an answer because it claims credentials or cites sources, not because it is better.",
+ "eli5": "Believing a kid because they said “my dad is a doctor”.",
+ "technical": "Judge scores shifted by cues of credibility (credentials, citations, confident register) independent of correctness; measured as the verdict flip rate after inserting fake authority (Chen et al. 2024; Ye et al. 2024)."
+}

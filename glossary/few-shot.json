@@ -1,0 +1,6 @@
+{
+ "term": "Few-shot examples",
+ "plain": "A handful of worked examples put in the prompt to show the model what a good answer or grade looks like.",
+ "eli5": "Showing someone three finished puzzles before they do their own.",
+ "technical": "In-context demonstrations (input, desired output) prepended to the query; the model conditions on them without any weight update. Their selection and order can change outputs."
+}

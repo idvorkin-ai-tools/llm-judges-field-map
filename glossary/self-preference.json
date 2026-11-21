@@ -1,0 +1,6 @@
+{
+ "term": "Self-preference",
+ "plain": "A judge giving higher marks to answers written by its own model than people would.",
+ "eli5": "Saying your own drawing is the best one in the class.",
+ "technical": "Self-enhancement bias: judge-minus-human score gap that is larger on outputs from the judge's own model or family. Panickssery et al. (2024) found it rises roughly linearly with the judge's ability to recognise its own text."
+}
