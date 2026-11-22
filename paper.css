@@ -356,6 +356,11 @@ html[data-eli5="on"] .gl-box .gl-plain,html[data-tech="on"] .gl-box .gl-plain{di
 html.gl-rail-on .gl-chip{display:none}
 .gl-rail{position:absolute;z-index:2}
 .gl-rail .gl-box{display:block;position:absolute;left:0;right:0;margin:0;font-size:12.5px}
+/* page text that only makes sense in one register (opt-in; see docs/INTERACTIVE.md).
+   terms.js has the same rules; these hide the blocks before it loads. */
+.tech-only{display:none}
+html[data-tech="on"] .tech-only{display:revert}
+html[data-tech="on"] .no-tech{display:none}
 /* the Plain / Technical / ELI5 control in the top bar (terms.js) */
 .modesel{display:inline-flex;flex-shrink:0;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--panel)}
 .modesel button{min-height:44px;min-width:44px;padding:0 10px;margin:0;border:0;border-left:1px solid var(--line);background:transparent;
