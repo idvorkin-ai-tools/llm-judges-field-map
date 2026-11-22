@@ -1,7 +1,0 @@
-{
- "term": "Youden's J",
- "plain": "How much more often the judge says YES to real YES items than to real NO items; 0 means it ignores the item.",
- "eli5": "Do you say “yes” more to the good ones than to the bad ones? By how much?",
- "technical": "Youden (1950), Peirce skill score: sensitivity + specificity − 1 = TPR − FPR, the height of the ROC point above the chance diagonal. Prevalence-free; implicitly sets misses and false alarms equal per class.",
- "formula": "J = TPR − FPR"
-}

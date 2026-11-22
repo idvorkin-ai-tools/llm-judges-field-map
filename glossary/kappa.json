@@ -1,7 +1,0 @@
-{
- "term": "Cohen's kappa",
- "plain": "Agreement with the lucky matches taken out: 0 means no better than chance, 1 means they always agree.",
- "eli5": "A score for how much two friends really agree, not counting the times they matched by luck.",
- "technical": "Chance-corrected agreement for two raters on a nominal scale (Cohen 1960): the fraction of the room above chance agreement that the raters actually used. Negative when they agree less than chance.",
- "formula": "κ = (p<sub>o</sub> − p<sub>e</sub>) / (1 − p<sub>e</sub>)"
-}

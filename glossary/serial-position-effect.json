@@ -1,6 +1,0 @@
-{
- "term": "Serial-position effect",
- "plain": "Items at the start or end of a list get remembered or chosen more than items in the middle.",
- "eli5": "In a line of ten cakes, you mostly remember the first one and the last one.",
- "technical": "Primacy and recency effects as a function of list position; in choice, the first or last option in a sequence is preferred over identical options in between (Mantonakis et al. 2009)."
-}

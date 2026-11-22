@@ -1,6 +1,0 @@
-{
- "term": "ROC curve",
- "plain": "A line showing every trade-off between catching YES items and wrongly flagging NO items as the pass mark moves.",
- "eli5": "Slide the bar up and you catch fewer good ones but make fewer mistakes; this line shows every choice at once.",
- "technical": "Receiver operating characteristic: the set of (FPR, TPR) points over all thresholds of a score. The diagonal is a judge that ignores the input."
-}

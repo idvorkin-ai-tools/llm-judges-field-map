@@ -1,6 +1,0 @@
-{
- "term": "Intraclass correlation",
- "plain": "A correlation-style score for how much of the spread in numeric ratings comes from real differences between items rather than between raters.",
- "eli5": "If the judges' numbers go up and down together for each thing, the score is high.",
- "technical": "ICC: between-subject variance over total variance in a random- or mixed-effects model of ratings. Fleiss and Cohen (1973): quadratic-weighted kappa equals an ICC (up to a small-sample term)."
-}

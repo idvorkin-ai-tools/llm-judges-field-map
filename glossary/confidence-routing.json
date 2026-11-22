@@ -1,6 +1,0 @@
-{
- "term": "Confidence routing",
- "plain": "Let the judge decide the cases it scores as clearly pass or clearly fail, and send the unsure middle to a person or a stronger grader.",
- "eli5": "The easy ones you mark yourself; the tricky ones go to the teacher.",
- "technical": "Selective prediction with abstention: two thresholds on the judge's score define auto-pass, auto-fail and escalate bands. It works only if the score is calibrated; set the band on dev, check per-band accuracy on test, and audit all bands."
-}

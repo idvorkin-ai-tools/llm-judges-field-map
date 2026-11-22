@@ -1,6 +1,0 @@
-{
- "term": "Criteria drift",
- "plain": "Your idea of what “good” means changes as you read more real outputs, so the grading rules keep shifting.",
- "eli5": "You start grading drawings for colour, then notice some have no faces and add a rule for that.",
- "technical": "Shankar et al. (2024): evaluation criteria are partly defined by grading outputs, so they change during annotation and some depend on the specific outputs observed; criteria cannot be fully fixed before grading."
-}

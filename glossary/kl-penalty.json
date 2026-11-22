@@ -1,7 +1,0 @@
-{
- "term": "KL penalty",
- "plain": "A cost for drifting too far from the original model, so training can't chase the judge's score too hard.",
- "eli5": "A leash: the dog can explore, but not run off after every smell.",
- "technical": "A term −β·KL(π ‖ π<sub>ref</sub>) added to the RLHF objective that limits how far the policy moves from its reference model, which bounds how much reward-model error it can exploit.",
- "formula": "maximise E[r(x, y)] − β · KL(π ‖ π<sub>ref</sub>)"
-}

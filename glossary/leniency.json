@@ -1,6 +1,0 @@
-{
- "term": "Leniency and severity",
- "plain": "A judge whose marks run consistently high (lenient) or low (severe) compared with everyone else's.",
- "eli5": "The teacher who gives everyone a gold star, and the one who never does.",
- "technical": "A constant offset in a rater's scores, or equivalently an effective pass cut below (lenient) or above (severe) the policy's. It can coexist with perfect ranking (unchanged AUC); read it off the YES rate against a labelled set."
-}

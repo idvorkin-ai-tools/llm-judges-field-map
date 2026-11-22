@@ -42,85 +42,17 @@
     var btns = document.querySelectorAll('[data-set-m]');
     for (var i = 0; i < btns.length; i++) btns[i].addEventListener('click', function () { set(this.getAttribute('data-set-m')); });
   });
-  // Explanation mode for term boxes (glossary.js): Plain, Technical or ELI5, one
-  // at a time. Stored per browser under one key and set on <html> before first
-  // paint (data-tech="on" or data-eli5="on"; Plain sets neither).
-  // Only a tap here writes storage. Storage events and bfcache restores just
-  // apply the stored value: writing back from a storage handler made open tabs
-  // re-broadcast stale values to each other, so the mode flipped on its own.
-  var MODE = 'llm-judges-mode';
-  var MODES = [['plain', 'Plain', 'Everyday words'], ['tech', 'Technical', 'Precise definitions and formulas'], ['eli5', 'ELI5', 'Explained as if to a five-year-old']];
-  var SHORT = { plain: 'Plain', tech: 'Tech', eli5: 'ELI5' };
-  function validMode(m) { return m === 'plain' || m === 'tech' || m === 'eli5'; }
-  function storedMode() {
-    try {
-      var m = localStorage.getItem(MODE);
-      if (validMode(m)) return m;
-      // Read-only migration from the old two-checkbox keys; never written again.
-      if (localStorage.getItem('llm-judges-tech') === 'on') return 'tech';
-      if (localStorage.getItem('llm-judges-eli5') === 'on') return 'eli5';
-    } catch (e) {}
-    return 'plain';
-  }
-  function getMode() { return root.getAttribute('data-tech') === 'on' ? 'tech' : root.getAttribute('data-eli5') === 'on' ? 'eli5' : 'plain'; }
-  // source: 'user' (a tap on this page) or 'sync' (another tab, or a restore).
-  function applyMode(m, source) {
-    if (!validMode(m)) return;
-    var changed = m !== getMode();
-    if (m === 'tech') root.setAttribute('data-tech', 'on'); else root.removeAttribute('data-tech');
-    if (m === 'eli5') root.setAttribute('data-eli5', 'on'); else root.removeAttribute('data-eli5');
-    var segs = document.querySelectorAll('.modesel button[data-mode]');
-    for (var i = 0; i < segs.length; i++) {
-      var on = segs[i].getAttribute('data-mode') === m;
-      segs[i].setAttribute('aria-checked', on ? 'true' : 'false');
-      segs[i].tabIndex = on ? 0 : -1;
-    }
-    if (source === 'user') {
-      try { if (localStorage.getItem(MODE) !== m) localStorage.setItem(MODE, m); } catch (e) {}
-    }
-    if (changed || source === 'user') {
-      try { document.dispatchEvent(new CustomEvent('llmj:prefs', { detail: { mode: m, source: source } })); } catch (e) {}
-    }
-  }
-  applyMode(storedMode(), 'sync');
-  window.addEventListener('storage', function (e) { if (e.key === MODE && validMode(e.newValue)) applyMode(e.newValue, 'sync'); });
-  window.addEventListener('pageshow', function (e) { if (e.persisted) applyMode(storedMode(), 'sync'); });
-  document.addEventListener('DOMContentLoaded', function () {
-    var mp = document.querySelector('.bar .mpick');
-    // The mode only changes term boxes, so pages without any don't show it.
-    if (!mp || !document.querySelector('.term[data-term]')) return;
-    var wrap = document.createElement('div');
-    wrap.className = 'modesel';
-    wrap.setAttribute('role', 'radiogroup');
-    wrap.setAttribute('aria-label', 'How term boxes explain things');
-    var cur = getMode();
-    MODES.forEach(function (d) {
-      var b = document.createElement('button');
-      b.type = 'button';
-      b.setAttribute('role', 'radio');
-      b.setAttribute('data-mode', d[0]);
-      b.setAttribute('aria-checked', d[0] === cur ? 'true' : 'false');
-      b.tabIndex = d[0] === cur ? 0 : -1;
-      b.setAttribute('aria-label', d[1] + ' explanations');
-      b.title = d[2];
-      b.innerHTML = '<span class="ms-full">' + d[1] + '</span><span class="ms-short">' + SHORT[d[0]] + '</span>';
-      b.addEventListener('click', function () { applyMode(d[0], 'user'); });
-      wrap.appendChild(b);
-    });
-    // Arrow keys move between the three, like native radios.
-    wrap.addEventListener('keydown', function (e) {
-      var keys = { ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1 };
-      if (!keys[e.key]) return;
-      e.preventDefault();
-      var bs = wrap.querySelectorAll('button'), at = 0;
-      for (var i = 0; i < bs.length; i++) if (bs[i].getAttribute('data-mode') === getMode()) at = i;
-      var nb = bs[(at + keys[e.key] + bs.length) % bs.length];
-      applyMode(nb.getAttribute('data-mode'), 'user');
-      nb.focus();
-    });
-    mp.parentNode.insertBefore(wrap, mp.nextSibling);
-  });
-  window.LLMJ = { keys: KEYS, names: NAMES, set: set, setMode: function (m) { applyMode(m, 'user'); }, getMode: getMode };
+  window.LLMJ = { keys: KEYS, names: NAMES, set: set };
+})();
+// Explanation mode (Plain / Technical / ELI5): the control, storage and term
+// boxes live in the hub's shared assets/terms.js. This only applies the stored
+// mode before first paint, the same way terms.js reads it; it never writes.
+(function () {
+  try {
+    var m = localStorage.getItem('aitools-mode');
+    if (m !== 'plain' && m !== 'tech' && m !== 'eli5') m = localStorage.getItem('llm-judges-mode');
+    if (m === 'tech' || m === 'eli5') document.documentElement.setAttribute('data-' + m, 'on');
+  } catch (e) {}
 })();
 // Unit menu: on part pages the "UNIT 07 OF 09" kicker opens a list of every
 // unit (this one marked) with this unit's sections under it; tap to jump.

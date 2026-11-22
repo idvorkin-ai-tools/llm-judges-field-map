@@ -1,7 +1,0 @@
-{
- "term": "Krippendorff's alpha",
- "plain": "An agreement score that copes with any number of judges, missing answers and ordered scales.",
- "eli5": "An agreement score that still works when some friends skipped some toys.",
- "technical": "One minus the ratio of observed to expected disagreement, computed from a coincidence matrix with a distance function chosen for the scale (nominal, ordinal, interval, ratio). Common bar: α ≥ 0.8.",
- "formula": "α = 1 − D<sub>o</sub> / D<sub>e</sub>"
-}

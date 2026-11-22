@@ -1,16 +1,18 @@
 # Interactive pieces: term boxes and widgets
 
-Two kinds of interactive pieces sit on top of the static pages. Both are plain JS with no build step and no libraries. `tools/check_variants.py` lints both.
+Two kinds of interactive pieces sit on top of the static pages. Both are plain JS with no build step and no libraries. `tools/check_variants.py` lints both. Term boxes come from the hub's shared `assets/terms.js`; widgets are this map's own.
 
 ## Term boxes
 
-A term box gives the plain meaning of a technical word beside its **first use on a page**. Readers pick how it explains with one three-way control in the top bar (`site.js`), one mode at a time:
+Term boxes, the Plain / Technical / ELI5 control and the glossary are shared by every map and live in the hub repo, [idvorkin-ai-tools.github.io](https://github.com/idvorkin-ai-tools/idvorkin-ai-tools.github.io): `assets/terms.js`, `assets/glossary/<id>.json`, documented in its `docs/SHARED-TERMS.md`. Change them there, not here.
+
+A term box gives the plain meaning of a technical word beside its **first use on a page**. Readers pick how it explains with one three-way control, which terms.js puts in the top bar after the metaphor menu:
 
 - **Plain** (default): one everyday sentence.
 - **Technical**: the precise definition, plus a formula when there is one.
 - **ELI5**: one short, concrete sentence a child would get.
 
-The control appears only on pages with at least one term box. Tapping a mode swaps the text at once, shows a short toast naming the mode, and flashes the boxes in view (on phones, where boxes start closed, it opens the nearest one). The choice is stored in `localStorage` under `llm-judges-mode` (`plain`, `tech` or `eli5`) and set on `<html>` as `data-tech="on"` or `data-eli5="on"` (Plain sets neither). Other open pages follow through the `storage` event and only swap their text: no toast, and they never write storage back. Only a tap writes the key; a handler that wrote back on a `storage` event made open tabs re-send stale values to each other and the mode flipped by itself. The old `llm-judges-tech` / `llm-judges-eli5` keys are read once, as a fallback, and never written.
+The choice is stored under `localStorage` `aitools-mode`, shared with every other map on the host, and set on `<html>` as `data-tech="on"` or `data-eli5="on"`. This map's old key, `llm-judges-mode`, is read as a fallback and never written. `site.js` applies the stored mode in `<head>` before first paint; it never writes it. Only a tap writes the key: a handler that wrote back on a `storage` event made open tabs re-send stale values to each other and the mode flipped by itself.
 
 ### Use a term on a page
 
@@ -20,17 +22,17 @@ The control appears only on pages with at least one term box. Tapping a mode swa
    <span class="term" data-term="kappa">Cohen's kappa</span>
    ```
 
-2. Load the script once, next to the other deferred scripts at the bottom of the page:
+2. Load the shared script once, next to the other deferred scripts at the bottom of the page:
 
    ```html
-   <script src="../glossary.js" defer></script>
+   <script src="https://idvorkin-ai-tools.github.io/assets/terms.js" defer></script>
    ```
 
 On wide screens the box sits in the right margin beside its line. On narrow screens the term gets a small `?` chip that opens the box inline. Box only words a smart non-specialist would not know; never box the same term twice on one page (the lint fails).
 
 ### Add a term
 
-One file per term: `glossary/<id>.json`, where `<id>` is lowercase-with-hyphens. Check `ls glossary/` first and **reuse an existing id**; pages must agree on a term's meaning, so only add a file when the term is new. Don't rewrite another term's file to suit one page; if an entry is wrong, fix it for every page.
+Terms are added in the hub repo, one file per term: `assets/glossary/<id>.json`, `<id>` lowercase-with-hyphens, then `python3 scripts/build_glossary_index.py` there. Check `ls assets/glossary/` first and **reuse an existing id**; every map's pages must agree on a term's meaning. Don't rewrite another term's file to suit one page; if an entry is wrong, fix it for every page.
 
 ```json
 {
@@ -45,12 +47,14 @@ One file per term: `glossary/<id>.json`, where `<id>` is lowercase-with-hyphens.
 
 - `term`, `plain`, `eli5`, `technical` are required (the lint checks). Values are HTML.
 - `formula` is optional and shows only in Technical mode.
-- `m` is optional: a one-line example per metaphor, shown under the plain sentence and switched by the metaphor menu. Give all five or leave it out.
+- `m` is optional: a one-line example per metaphor, shown under the plain sentence and switched by the metaphor menu (only on this map, which has one). Give all five or leave it out.
 - One sentence per register. Plain words; no "leverages", "robust", "nuanced".
+
+A term must exist in the hub before a page here uses it, and the hub change must be live before this page ships.
 
 ### Register-specific page text (optional, use sparingly)
 
-`class="tech-only"` hides an element unless Technical is on; `class="no-tech"` hides it when Technical is on. Use it only where it is cheap, such as an extra formula line. Don't write three versions of a page.
+`class="tech-only"` hides an element unless Technical is on; `class="no-tech"` hides it when Technical is on; `plain-only` and `eli5-only` also exist. Use them only where it is cheap, such as an extra formula line. Don't write three versions of a page.
 
 ## Unit menu
 
@@ -145,9 +149,14 @@ python3 tools/check_variants.py      # metaphor slots, term boxes, widget script
 node --test tools/                   # maths
 ```
 
-If you touch `site.js`, `glossary.js` or the top bar, also run the browser check (WebKit iPad with touch, Chromium phone at 390 and desktop at 1200; two-tab sync, no echo, no overflow, no console errors). It needs a Playwright install with WebKit:
+`check_variants.py` reads the shared glossary from `$AITOOLS_HUB`, else `~/gits/idvorkin-ai-tools.github.io/.worktrees/shared-terms` if it exists, else the live site. The hub's `python3 scripts/check_terms.py <this-repo>` runs the same term checks from the other side.
+
+If you touch `site.js` or the top bar, or the hub's `terms.js`, also run the browser check (WebKit iPad with touch, Chromium phone at 390 and desktop at 1200; two-tab sync, no echo, no overflow, no console errors, the mode carrying to the hub's test page). It needs a Playwright install whose WebKit build is downloaded:
 
 ```bash
+# against a local hub checkout (serves both repos as https://idvorkin-ai-tools.github.io/)
+AITOOLS_HUB=~/gits/idvorkin-ai-tools.github.io PLAYWRIGHT=/path/to/node_modules/playwright node tools/browser_check.cjs
+# or against the live terms.js
 python3 -m http.server 8731 &
 PLAYWRIGHT=/path/to/node_modules/playwright node tools/browser_check.cjs http://127.0.0.1:8731
 ```

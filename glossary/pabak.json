@@ -1,7 +1,0 @@
-{
- "term": "PABAK",
- "plain": "Prevalence- and bias-adjusted kappa: what kappa would be if YES and NO were equally common and the judges equally keen on YES.",
- "eli5": "Kappa with the “almost everything is no” effect taken out.",
- "technical": "Byrt, Bishop and Carlin (1993): PABAK = 2p<sub>o</sub> − 1, with prevalence index PI = (a − d)/n and bias index BI = (b − c)/n; kappa is recovered exactly from the three.",
- "formula": "κ = (PABAK − PI² + BI²) / (1 − PI² + BI²)"
-}

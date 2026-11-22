@@ -1,6 +1,0 @@
-{
- "term": "RLHF",
- "plain": "Training a model to give answers that a learned judge of human preferences scores highly.",
- "eli5": "Giving a puppy a treat each time it does what people liked, until it learns what earns treats.",
- "technical": "Reinforcement learning from human feedback: fit a reward model to human preference comparisons, then optimise the policy against it (e.g. with PPO), usually with a KL penalty to the starting model."
-}
