@@ -1,6 +1,0 @@
-{
- "term": "Anchoring",
- "plain": "A judgement drifting towards a number seen just before, even when that number is irrelevant.",
- "eli5": "Someone says “a hundred!” before you guess the jelly beans, and your guess comes out bigger.",
- "technical": "Insufficient adjustment from an initial value (Tversky and Kahneman 1974): estimates shift towards a salient prior number. In a judge prompt, a reference answer, prior score or other judge's verdict acts as the anchor."
-}

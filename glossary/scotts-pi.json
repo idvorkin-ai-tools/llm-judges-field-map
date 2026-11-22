@@ -1,7 +1,0 @@
-{
- "term": "Scott's pi",
- "plain": "Kappa's older cousin: the same idea, but it works out chance agreement from both judges' YES rates pooled together.",
- "eli5": "Like kappa, but it pretends both friends say “yes” equally often when it guesses the lucky matches.",
- "technical": "Scott (1955): chance agreement from the pooled marginal p̄ = (p<sub>A</sub> + p<sub>B</sub>)/2. Since p<sub>e,π</sub> − p<sub>e,κ</sub> = (p<sub>A</sub> − p<sub>B</sub>)²/2 ≥ 0, π ≤ κ; Fleiss' kappa generalises π, not κ.",
- "formula": "π = (p<sub>o</sub> − p<sub>e,π</sub>) / (1 − p<sub>e,π</sub>), p<sub>e,π</sub> = p̄² + (1 − p̄)²"
-}

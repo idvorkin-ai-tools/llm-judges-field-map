@@ -1,7 +1,0 @@
-{
- "term": "Central tendency",
- "plain": "A judge that avoids the ends of the scale and gives nearly everything the middle score.",
- "eli5": "Answering “it was okay” about every movie.",
- "technical": "Range restriction in ratings: low score variance with mass on the midpoint, which caps correlation with human scores. G-Eval counters it by weighting each score by its token probability: score = Σ p(s)·s.",
- "formula": "score = Σ<sub>s</sub> p(s) · s"
-}

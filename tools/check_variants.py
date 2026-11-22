@@ -8,10 +8,15 @@ Every element with class "mx" must have, as direct children, exactly one
 may sit outside an .mx parent. Pages under parts/ must link paper.css and
 site.js in <head>, carry no <style> block and no leftover {{ slots, and
 load fig.js if they have a figure. Term boxes and widgets (docs/INTERACTIVE.md):
-every data-term must have glossary/<id>.json with term, plain, eli5 and
-technical, appear once per page, and the page must load glossary.js; every
-data-lab must have widgets/<name>.js loaded after lab.js and widgets.js.
+every data-term must have a shared glossary entry with term, plain, eli5 and
+technical, appear once per page, and the page must load the hub's terms.js;
+every data-lab must have widgets/<name>.js loaded after lab.js and widgets.js.
 Exit 1 on any problem. Stdlib only.
+
+The glossary lives in the hub repo (idvorkin-ai-tools.github.io, assets/glossary/).
+It is read from $AITOOLS_HUB if set, else from
+~/gits/idvorkin-ai-tools.github.io/.worktrees/shared-terms if that exists,
+else fetched from the live site.
 """
 
 import glob
@@ -19,6 +24,8 @@ import json
 import os
 import re
 import sys
+import urllib.error
+import urllib.request
 from html.parser import HTMLParser
 
 KEYS = {"hire", "review", "wine", "med", "ump"}
@@ -66,6 +73,38 @@ class P(HTMLParser):
 
 
 GLOSS_KEYS = ("term", "plain", "eli5", "technical")
+LIVE = "https://idvorkin-ai-tools.github.io/assets/glossary/"
+TERMS_JS = "https://idvorkin-ai-tools.github.io/assets/terms.js"
+
+
+def hub_glossary():
+    """A local hub glossary dir, or None to fetch from the live site."""
+    for d in (os.environ.get("AITOOLS_HUB"), os.path.expanduser("~/gits/idvorkin-ai-tools.github.io/.worktrees/shared-terms")):
+        if d and os.path.isdir(os.path.join(d, "assets", "glossary")):
+            return os.path.join(d, "assets", "glossary")
+    return None
+
+
+GLOSSARY = hub_glossary()
+_entries = {}
+
+
+def entry(t):
+    """(dict or None, error or None) for glossary id t."""
+    if t not in _entries:
+        where = os.path.join(GLOSSARY, t + ".json") if GLOSSARY else LIVE + t + ".json"
+        try:
+            if GLOSSARY:
+                raw = open(where, encoding="utf-8").read()
+            else:
+                with urllib.request.urlopen(where, timeout=15) as r:
+                    raw = r.read().decode("utf-8")
+            _entries[t] = (json.loads(raw), None)
+        except (OSError, urllib.error.URLError):
+            _entries[t] = (None, f"data-term={t!r} has no glossary entry ({where})")
+        except ValueError as e:
+            _entries[t] = (None, f"{where} is not valid JSON: {e}")
+    return _entries[t]
 
 
 def check_interactive(root, rel, s):
@@ -74,20 +113,15 @@ def check_interactive(root, rel, s):
     for t in sorted(set(terms)):
         if terms.count(t) > 1:
             errs.append(f"data-term={t!r} used {terms.count(t)} times; box only the first use")
-        g = os.path.join(root, "glossary", t + ".json")
-        if not os.path.exists(g):
-            errs.append(f"data-term={t!r} has no glossary/{t}.json")
-            continue
-        try:
-            d = json.load(open(g, encoding="utf-8"))
-        except ValueError as e:
-            errs.append(f"glossary/{t}.json is not valid JSON: {e}")
+        d, err = entry(t)
+        if err:
+            errs.append(err)
             continue
         for k in GLOSS_KEYS:
             if not str(d.get(k, "")).strip():
-                errs.append(f"glossary/{t}.json missing {k!r}")
-    if terms and "glossary.js" not in s:
-        errs.append("has data-term but does not load glossary.js")
+                errs.append(f"glossary entry {t!r} missing {k!r}")
+    if terms and TERMS_JS not in s:
+        errs.append(f"has data-term but does not load {TERMS_JS}")
     labs = re.findall(r'data-lab="([^"]+)"', s)
     if labs:
         for need in ("lab.js", "widgets.js"):
@@ -103,6 +137,7 @@ def check_interactive(root, rel, s):
 
 def main():
     root = sys.argv[1] if len(sys.argv) > 1 else os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    print("glossary:", GLOSSARY or LIVE)
     bad = 0
     for f in sorted(glob.glob(os.path.join(root, "**", "*.html"), recursive=True)):
         if "/tools/" in f or "/.git/" in f:

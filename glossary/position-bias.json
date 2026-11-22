@@ -1,6 +1,0 @@
-{
- "term": "Position bias",
- "plain": "A judge comparing two answers favours whichever is shown first (or second), regardless of quality.",
- "eli5": "Always picking the cookie on the left, even when the right one is bigger.",
- "technical": "Order dependence in pairwise judging, measured by swapping the pair and counting verdicts that flip (conflict rate). Fix: judge both orders and count a win only when both agree."
-}

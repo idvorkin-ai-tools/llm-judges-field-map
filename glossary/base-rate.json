@@ -1,7 +1,0 @@
-{
- "term": "Base rate",
- "plain": "How common something is before you look at any evidence; another name for prevalence.",
- "eli5": "Before you open the box, how likely is a prize inside?",
- "technical": "The prior probability of the positive class. Combined with a test's sensitivity and specificity by Bayes' rule, it sets the precision of a positive verdict.",
- "formula": "precision = sens·π / (sens·π + (1 − spec)(1 − π))"
-}

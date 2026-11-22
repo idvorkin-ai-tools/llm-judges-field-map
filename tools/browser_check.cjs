@@ -5,10 +5,33 @@
 //   python3 -m http.server 8731 &       # from the repo root
 //   PLAYWRIGHT=/path/to/node_modules/playwright node tools/browser_check.cjs http://127.0.0.1:8731
 //
+// The mode control and term boxes come from the hub's assets/terms.js, loaded
+// by absolute URL. To test against a local hub checkout before it is live:
+//
+//   AITOOLS_HUB=~/gits/idvorkin-ai-tools.github.io PLAYWRIGHT=… node tools/browser_check.cjs
+//
+// which serves https://idvorkin-ai-tools.github.io/ from disk (this repo under
+// /llm-judges-field-map/, the hub everywhere else), so every map shares one
+// origin as it does live, and checks the mode carries to the hub's test page.
+//
 // Not a node:test file on purpose: `node --test tools/` stays browser-free.
 // Exits 1 on any failure.
+const fs = require('fs'), path = require('path');
 const pw = require(process.env.PLAYWRIGHT || 'playwright');
-const BASE = (process.argv[2] || 'http://127.0.0.1:8731').replace(/\/$/, '');
+const HUB = process.env.AITOOLS_HUB;
+const ORIGIN = 'https://idvorkin-ai-tools.github.io';
+const BASE = HUB ? ORIGIN + '/llm-judges-field-map' : (process.argv[2] || 'http://127.0.0.1:8731').replace(/\/$/, '');
+const TYPES = { '.html': 'text/html', '.js': 'text/javascript', '.json': 'application/json', '.css': 'text/css', '.svg': 'image/svg+xml', '.png': 'image/png', '.webp': 'image/webp' };
+async function serveLocal(ctx) {
+  const map = path.resolve(__dirname, '..');
+  await ctx.route(ORIGIN + '/**', r => {
+    let p = decodeURIComponent(new URL(r.request().url()).pathname);
+    let f = p.startsWith('/llm-judges-field-map/') ? path.join(map, p.slice(22)) : path.join(HUB, p);
+    if (f.endsWith('/')) f += 'index.html';
+    if (!fs.existsSync(f) || !fs.statSync(f).isFile()) return r.fulfill({ status: 404, body: 'not found' });
+    return r.fulfill({ status: 200, body: fs.readFileSync(f), headers: { 'content-type': TYPES[path.extname(f)] || 'application/octet-stream', 'access-control-allow-origin': '*' } });
+  });
+}
 const ONLY = process.argv[3]; // optional: webkit | chromium
 let fails = 0;
 function ok(cond, msg) { console.log((cond ? '  ok   ' : '  FAIL ') + msg); if (!cond) fails++; }
@@ -27,13 +50,13 @@ async function open(ctx, path, errs) {
   await p.waitForSelector('.gl-box', { state: 'attached' }).catch(() => {});
   await p.evaluate(() => {
     window.__ev = 0;
-    window.addEventListener('storage', e => { if (e.key === 'llm-judges-mode') window.__ev++; });
+    window.addEventListener('storage', e => { if (e.key === 'aitools-mode') window.__ev++; });
   });
   return p;
 }
 const press = (p, touch, sel) => (touch ? p.locator(sel).tap() : p.locator(sel).click());
 const state = p => p.evaluate(() => ({
-  mode: (localStorage.getItem('llm-judges-mode')),
+  mode: (localStorage.getItem('aitools-mode')),
   tech: document.documentElement.getAttribute('data-tech'),
   eli5: document.documentElement.getAttribute('data-eli5'),
   checked: [...document.querySelectorAll('.modesel [aria-checked=true]')].map(b => b.dataset.mode),
@@ -45,6 +68,7 @@ async function run(cfg) {
   console.log('\n== ' + cfg.name);
   const browser = await pw[cfg.engine].launch();
   const ctx = await browser.newContext(cfg.ctx());
+  if (HUB) await serveLocal(ctx);
   const touch = !!cfg.ctx().hasTouch;
   const errs = [];
   const a = await open(ctx, 'parts/p07.html', errs);
@@ -158,14 +182,27 @@ async function run(cfg) {
   await c.waitForURL(/p03\.html$/, { timeout: 5000 }).catch(() => {});
   ok(/p03\.html$/.test(c.url()), 'unit link navigates: ' + c.url());
 
-  // old keys migrate (read only)
+  // the mode follows the reader to another map on the same origin
+  if (HUB) {
+    await press(a, touch, '.modesel button[data-mode=tech]');
+    const d = await ctx.newPage();
+    d.on('pageerror', e => errs.push('terms-demo: ' + e.message));
+    await d.goto(ORIGIN + '/assets/terms-demo.html');
+    await d.waitForSelector('.modesel');
+    const dm = await d.evaluate(() => ({ tech: document.documentElement.getAttribute('data-tech'), checked: document.querySelector('.modesel [aria-checked=true]').dataset.mode, floating: document.querySelector('.modesel').classList.contains('aitm-float') }));
+    ok(dm.tech === 'on' && dm.checked === 'tech' && dm.floating, 'Technical set on a judges page shows on the hub test page: ' + JSON.stringify(dm));
+    await d.close();
+  }
+
+  // the old judges key is a read-only fallback
   const m = await ctx.newPage();
   await m.goto(BASE + '/parts/p04.html');
-  await m.evaluate(() => { localStorage.removeItem('llm-judges-mode'); localStorage.setItem('llm-judges-tech', 'on'); });
+  await m.evaluate(() => { localStorage.removeItem('aitools-mode'); localStorage.setItem('llm-judges-mode', 'tech'); });
   await m.reload();
   await m.waitForSelector('.modesel');
-  const mig = await m.evaluate(() => ({ checked: document.querySelector('.modesel [aria-checked=true]').dataset.mode, stored: localStorage.getItem('llm-judges-mode') }));
-  ok(mig.checked === 'tech' && mig.stored === null, 'old Technical key shows as Technical without writing storage: ' + JSON.stringify(mig));
+  const mig = await m.evaluate(() => ({ checked: document.querySelector('.modesel [aria-checked=true]').dataset.mode, stored: localStorage.getItem('aitools-mode'), old: localStorage.getItem('llm-judges-mode') }));
+  ok(mig.checked === 'tech' && mig.stored === null && mig.old === 'tech', 'old llm-judges-mode shows as Technical without writing storage: ' + JSON.stringify(mig));
+  await m.evaluate(() => localStorage.removeItem('llm-judges-mode'));
 
   ok(errs.length === 0, 'no console errors' + (errs.length ? ': ' + errs.join(' | ') : ''));
   await browser.close();

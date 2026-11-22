@@ -1,7 +1,0 @@
-{
- "term": "Weighted kappa",
- "plain": "Kappa that gives partial credit when two scores are close, like a 4 against a 5.",
- "eli5": "Being one step off counts as a small mistake, being far off counts as a big one.",
- "technical": "Cohen (1968): kappa computed with disagreement weights by distance between categories, usually linear or quadratic; quadratic-weighted kappa approximates the intraclass correlation.",
- "formula": "κ<sub>w</sub> = 1 − Σ w<sub>ij</sub>o<sub>ij</sub> / Σ w<sub>ij</sub>e<sub>ij</sub>"
-}

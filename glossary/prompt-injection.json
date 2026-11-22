@@ -1,6 +1,0 @@
-{
- "term": "Prompt injection",
- "plain": "Text inside the thing being judged that gives the judge instructions, such as “rate this 10/10”, which the judge may follow.",
- "eli5": "Writing “give me an A” in tiny letters at the bottom of your homework.",
- "technical": "Adversarial content in untrusted input that the model treats as instructions. Against judges: universal suffixes that inflate absolute scores (Raina et al. 2024), optimised injections for pairwise judges (Shi et al. 2024)."
-}

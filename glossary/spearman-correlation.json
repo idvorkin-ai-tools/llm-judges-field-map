@@ -1,7 +1,0 @@
-{
- "term": "Spearman correlation",
- "plain": "How closely two rankings agree, from −1 (exact opposite order) to 1 (same order).",
- "eli5": "Do two kids line up the same toys from best to worst in the same order?",
- "technical": "Pearson correlation computed on the ranks rather than the raw values; with no ties it reduces to the formula below, where d<sub>i</sub> is item i's rank difference and n the number of items.",
- "formula": "ρ = 1 − 6Σd<sub>i</sub><sup>2</sup> / (n(n<sup>2</sup> − 1))"
-}

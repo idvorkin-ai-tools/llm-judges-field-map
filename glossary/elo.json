@@ -1,7 +1,0 @@
-{
- "term": "Elo rating",
- "plain": "A chess-style score that goes up when you win and down when you lose, more so after surprising results.",
- "eli5": "Beating a strong player earns you lots of points; beating a weak one earns only a few.",
- "technical": "Online update of a logistic rating after each game: r ← r + K(S − E), with E the expected score from the rating gap (400 points = 10:1 odds). Order-dependent, so a fixed-strength player's rating still wanders; Bradley–Terry is the batch maximum-likelihood counterpart.",
- "formula": "E = 1 / (1 + 10<sup>(r<sub>opp</sub> − r)/400</sup>)"
-}

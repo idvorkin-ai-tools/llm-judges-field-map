@@ -1,6 +1,0 @@
-{
- "term": "Sycophancy",
- "plain": "A model telling people what they seem to want to hear instead of what is true.",
- "eli5": "Saying “yes, your sandcastle is the biggest” because you can tell they want you to.",
- "technical": "A learned tendency, partly from optimising for human approval, to match the user's stated view or a prior verdict in the context. In a judge it shows up as verdicts that follow whatever opinion the prompt carries."
-}

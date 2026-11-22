@@ -1,7 +1,0 @@
-{
- "term": "F1 score",
- "plain": "One number mixing precision and sensitivity; it ignores the items correctly called NO.",
- "eli5": "A grade for finding eggs that punishes both missing eggs and calling rocks eggs, but never counts the rocks you left alone.",
- "technical": "Harmonic mean of precision and recall. Independent of TN, so it is not symmetric in the classes and changes with prevalence.",
- "formula": "F1 = 2PR / (P + R) = 2TP / (2TP + FP + FN)"
-}

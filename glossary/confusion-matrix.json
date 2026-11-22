@@ -1,6 +1,0 @@
-{
- "term": "Confusion matrix",
- "plain": "A 2×2 count of the judge's calls against the truth: right YES, missed YES, false YES, right NO.",
- "eli5": "Four boxes: the ones you got right, the ones you missed, the ones you got wrong by saying yes, and the right no's.",
- "technical": "The contingency table of predicted against reference labels: TP, FN, FP, TN. Every binary validity metric is a ratio of its cells."
-}

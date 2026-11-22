@@ -333,7 +333,8 @@ figure.fig{position:relative;z-index:1}
 .lab svg.lab-bar,.lab svg.lab-br{max-width:560px;margin:6px auto}
 .lab{scroll-margin-top:72px}
 
-/* term boxes (glossary.js + glossary/<id>.json), Igor 2026-11-21: plain meaning beside each fancy word */
+/* term boxes (the hub's assets/terms.js + assets/glossary/<id>.json), Igor 2026-11-21: plain meaning beside each fancy word.
+   terms.js injects zero-specificity defaults and the mode-block rules; these keep this map's look. */
 .term.gl-ready{border-bottom:1px dotted var(--def);color:inherit}
 .gl-chip{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;margin:0 2px 0 3px;padding:0;
   border:1px solid rgba(53,207,224,.5);border-radius:50%;background:rgba(53,207,224,.08);color:var(--def);
@@ -355,11 +356,12 @@ html[data-eli5="on"] .gl-box .gl-plain,html[data-tech="on"] .gl-box .gl-plain{di
 html.gl-rail-on .gl-chip{display:none}
 .gl-rail{position:absolute;z-index:2}
 .gl-rail .gl-box{display:block;position:absolute;left:0;right:0;margin:0;font-size:12.5px}
-/* page text that only makes sense in one register (opt-in; see docs/INTERACTIVE.md) */
+/* page text that only makes sense in one register (opt-in; see docs/INTERACTIVE.md).
+   terms.js has the same rules; these hide the blocks before it loads. */
 .tech-only{display:none}
 html[data-tech="on"] .tech-only{display:revert}
 html[data-tech="on"] .no-tech{display:none}
-/* the Plain / Technical / ELI5 control in the top bar (site.js) */
+/* the Plain / Technical / ELI5 control in the top bar (terms.js) */
 .modesel{display:inline-flex;flex-shrink:0;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--panel)}
 .modesel button{min-height:44px;min-width:44px;padding:0 10px;margin:0;border:0;border-left:1px solid var(--line);background:transparent;
   color:var(--ink-dim);font-family:'IBM Plex Mono',monospace;font-size:11.5px;letter-spacing:.02em;cursor:pointer;white-space:nowrap;
@@ -374,7 +376,7 @@ html[data-tech="on"] .no-tech{display:none}
 @media (max-width:480px){.modesel button{padding:0 6px;font-size:11px}.mpick select{max-width:104px;padding:5px 4px}}
 .lab svg.lab-cost,.lab svg.lab-ci{max-width:560px;margin:6px auto}
 .lab .statgrid .s .v small{font-size:12px;color:var(--ink-dim);font-weight:400}
-/* mode feedback (glossary.js) */
+/* mode feedback (terms.js) */
 .gl-toast{position:fixed;left:50%;bottom:18px;transform:translate(-50%,20px);opacity:0;pointer-events:none;z-index:60;
   max-width:min(520px,calc(100vw - 32px));font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--ink);background:var(--panel-2);
   border:1px solid var(--def);border-radius:8px;padding:8px 12px;box-shadow:0 6px 24px rgba(0,0,0,.5);transition:opacity .2s,transform .2s}

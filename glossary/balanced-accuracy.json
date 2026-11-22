@@ -1,7 +1,0 @@
-{
- "term": "Balanced accuracy",
- "plain": "The average of how well the judge does on real YES items and on real NO items, so a rare class counts as much as a common one.",
- "eli5": "Half your mark for finding the eggs, half for leaving the rocks alone.",
- "technical": "Mean of TPR and TNR; an affine transform of Youden's J and prevalence-free. Chance level is 0.5.",
- "formula": "BA = (TPR + TNR) / 2 = (J + 1) / 2"
-}

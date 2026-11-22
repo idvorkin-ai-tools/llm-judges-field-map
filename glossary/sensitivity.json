@@ -1,7 +1,0 @@
-{
- "term": "Sensitivity (recall)",
- "plain": "Of the items that really are YES, the share the judge catches.",
- "eli5": "Of all the hidden eggs, how many did you find?",
- "technical": "True positive rate, recall: a row ratio, so it does not depend on prevalence.",
- "formula": "TPR = TP / (TP + FN)"
-}

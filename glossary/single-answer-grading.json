@@ -1,6 +1,0 @@
-{
- "term": "Single-answer grading",
- "plain": "Show the judge one output and ask for a score on a fixed scale.",
- "eli5": "The teacher marks your drawing out of ten without looking at anyone else's.",
- "technical": "Pointwise (absolute) evaluation: the judge maps one response, given a rubric, to a scale value; MT-Bench's default mode (Zheng et al. 2023). Scores depend on the judge's internal cut points, so they shift with the judge model or prompt."
-}

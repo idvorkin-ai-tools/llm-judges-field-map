@@ -1,6 +1,0 @@
-{
- "term": "Held-out test set",
- "plain": "Labelled items kept aside and used once, at the end, so the score is not flattered by tuning.",
- "eli5": "The real exam, with questions you never saw while practising.",
- "technical": "A test split never used for prompt design, example selection or threshold choice. Reusing it for decisions turns it into a dev set and biases the estimate upward (adaptive overfitting)."
-}

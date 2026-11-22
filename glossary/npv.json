@@ -1,7 +1,0 @@
-{
- "term": "Negative predictive value",
- "plain": "When the judge says NO, how often it is right.",
- "eli5": "When you say “no egg here”, how often is there really none?",
- "technical": "A column ratio, so it moves with prevalence (rising as YES gets rarer).",
- "formula": "NPV = TN / (TN + FN)"
-}

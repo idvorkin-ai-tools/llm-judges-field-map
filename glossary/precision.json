@@ -1,7 +1,0 @@
-{
- "term": "Precision",
- "plain": "When the judge says YES, how often it is right.",
- "eli5": "When you shout “found one!”, how often is it really an egg?",
- "technical": "Positive predictive value: a column ratio, so it falls sharply when the positive class is rare.",
- "formula": "PPV = TP / (TP + FP)"
-}

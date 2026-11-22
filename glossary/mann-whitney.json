@@ -1,7 +1,0 @@
-{
- "term": "Mann–Whitney statistic",
- "plain": "Pair every YES item with every NO item and count how often the YES one got the higher score; that share is the AUC.",
- "eli5": "Line up every good apple against every bad apple and count how often the good one won.",
- "technical": "Wilcoxon–Mann–Whitney U divided by n<sub>1</sub>n<sub>2</sub> estimates P(X > Y) + ½P(X = Y), which equals the trapezoidal ROC area (Hanley and McNeil 1982).",
- "formula": "AUC = U / (n<sub>1</sub>n<sub>2</sub>)"
-}
