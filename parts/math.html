@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Appendix: the maths, worked &mdash; LLM Judges, mapped</title>
-<meta name="description" content="Every statistic on the site derived and worked on one shared casebook: percent agreement, Cohen's kappa, Scott's pi, the kappa paradoxes, Fleiss' kappa, Krippendorff's alpha, weighted kappa, the confusion matrix, Youden's J, base rates, ROC and AUC, Wilson intervals, bootstrap intervals and sample size." />
+<meta name="description" content="Every statistic on the site in three layers (plain words, formulas, full worked examples) on one shared casebook: percent agreement, Cohen's kappa, Scott's pi, the kappa paradoxes, Fleiss' kappa, Krippendorff's alpha, weighted kappa, the confusion matrix, Youden's J, base rates, ROC and AUC, Wilson intervals, bootstrap intervals and sample size." />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
@@ -21,13 +21,108 @@
 <main>
   <div class="eyebrow"><span class="box wb mono">APPENDIX &middot; THE MATHS</span><span class="mono">agreement &middot; validity &middot; ranking &middot; uncertainty</span></div>
   <h1>Appendix: the maths, worked</h1>
-  <div class="authors">Every number on the site, derived and worked by hand on the shared casebook. The arithmetic is the same in every domain; only the nouns change. Turn on <b>Technical</b> in the top bar for exact definitions in the term boxes and a few extra derivations.</div>
+  <div class="authors">Every number on the site, derived and worked by hand on the shared casebook, in three passes over the same twelve ideas. <b>Layer 1</b> says what each one is for in plain words; <b>Layer 2</b> gives its formula and what each symbol means; <b>Layer 3</b> works it in full. Stop after any layer. The arithmetic is the same in every domain; only the nouns change. Turn on <b>Technical</b> in the top bar for exact definitions in the term boxes and a few extra derivations.</div>
 
+  <h2 id="contents">Contents</h2>
+  <div class="scroll"><table class="kv">
+    <tr><th>Idea</th><th><a class="lnk" href="#layer-1">1 &middot; plain</a></th><th><a class="lnk" href="#layer-2">2 &middot; formula</a></th><th><a class="lnk" href="#layer-3">3 &middot; worked</a></th></tr>
+    <tr class="tot"><td colspan="4">Agreement: judges against each other</td></tr>
+    <tr><td>Agreement beyond chance: kappa and pi</td><td><a class="lnk" href="#l1-kappa">plain</a></td><td><a class="lnk" href="#l2-kappa">formula</a></td><td><a class="lnk" href="#kappa">worked</a></td></tr>
+    <tr><td>The kappa paradoxes</td><td><a class="lnk" href="#l1-paradox">plain</a></td><td><a class="lnk" href="#l2-paradox">formula</a></td><td><a class="lnk" href="#paradox">worked</a></td></tr>
+    <tr><td>Fleiss' kappa: three or more judges</td><td><a class="lnk" href="#l1-fleiss">plain</a></td><td><a class="lnk" href="#l2-fleiss">formula</a></td><td><a class="lnk" href="#fleiss">worked</a></td></tr>
+    <tr><td>Krippendorff's alpha</td><td><a class="lnk" href="#l1-alpha">plain</a></td><td><a class="lnk" href="#l2-alpha">formula</a></td><td><a class="lnk" href="#alpha">worked</a></td></tr>
+    <tr><td>Weighted kappa</td><td><a class="lnk" href="#l1-weighted">plain</a></td><td><a class="lnk" href="#l2-weighted">formula</a></td><td><a class="lnk" href="#weighted">worked</a></td></tr>
+    <tr class="tot"><td colspan="4">Validity: a judge against the truth</td></tr>
+    <tr><td>The confusion matrix</td><td><a class="lnk" href="#l1-confusion">plain</a></td><td><a class="lnk" href="#l2-confusion">formula</a></td><td><a class="lnk" href="#confusion">worked</a></td></tr>
+    <tr><td>Youden's J</td><td><a class="lnk" href="#l1-youden">plain</a></td><td><a class="lnk" href="#l2-youden">formula</a></td><td><a class="lnk" href="#youden">worked</a></td></tr>
+    <tr><td>Base rates and precision</td><td><a class="lnk" href="#l1-base-rate">plain</a></td><td><a class="lnk" href="#l2-base-rate">formula</a></td><td><a class="lnk" href="#base-rate">worked</a></td></tr>
+    <tr><td>The ROC curve</td><td><a class="lnk" href="#l1-roc">plain</a></td><td><a class="lnk" href="#l2-roc">formula</a></td><td><a class="lnk" href="#roc">worked</a></td></tr>
+    <tr><td>AUC</td><td><a class="lnk" href="#l1-auc">plain</a></td><td><a class="lnk" href="#l2-auc">formula</a></td><td><a class="lnk" href="#auc">worked</a></td></tr>
+    <tr class="tot"><td colspan="4">Uncertainty: how far a number would move</td></tr>
+    <tr><td>Confidence intervals</td><td><a class="lnk" href="#l1-ci">plain</a></td><td><a class="lnk" href="#l2-ci">formula</a></td><td><a class="lnk" href="#ci">worked</a></td></tr>
+    <tr><td>Sample size</td><td><a class="lnk" href="#l1-sample-size">plain</a></td><td><a class="lnk" href="#l2-sample-size">formula</a></td><td><a class="lnk" href="#sample-size">worked</a></td></tr>
+  </table></div>
+  <p>Then <a class="lnk" href="#can-say">what you can say now</a> and the <a class="lnk" href="#sources">sources</a>.</p>
+
+  <h2 id="layer-1"><span class="tag wb">LAYER 1</span> The whole appendix in plain words</h2>
   <div class="tldr"><b>TL;DR &mdash;</b> Three families. <b>Agreement</b> statistics (kappa, pi, Fleiss, alpha, weighted kappa) compare judges with each other, minus what chance would give. <b>Validity</b> statistics (sensitivity, specificity, precision, J, ROC, AUC) compare a judge with the truth. <b>Uncertainty</b> statistics (Wilson intervals, kappa's standard error, the bootstrap) say how far any of them would move on another sample. Each is a few lines of arithmetic on a small table, done here in full.</div>
-
-  <p class="lead">Each section states a formula, its source, and works it on the casebook numbers, computed by script and re-derived by hand (unrounded value first). Notation: <i>n</i> items, <i>p</i> a proportion, and a 2&times;2 table with cells <i>a</i>, <i>b</i>, <i>c</i>, <i>d</i> left to right, top to bottom.</p>
-
   <p>The casebook has three groups of numbers. A <b>two-judge table</b> of 100 items for agreement, rated by <span class="mx"><span data-m="hire">interviewers Ana and Ben</span><span data-m="review">managers Carla and Dev</span><span data-m="wine">judges Elodie and Femi</span><span data-m="med">Dr Gale and Dr Hart, double reading</span><span data-m="ump">umpires Ivo and June, calling the same pitches on video</span></span>; a <b>three-judge</b> version of 100 items; and a <b>judge-versus-truth</b> table of 200 items, 60 of them truly YES, where the truth is <span class="mx"><span data-m="hire">how the hire did a year later (an idealised study: only hires get an outcome)</span><span data-m="review">a calibration committee's consensus rating, since reviews have no outside truth</span><span data-m="wine">a reference panel's verdict, since wine quality has no outside truth</span><span data-m="med">biopsy or a year of clean follow-up</span><span data-m="ump">the pitch-tracking camera and the rulebook zone</span></span>. The YES label is <span class="mx"><span data-m="hire">&ldquo;hire&rdquo;</span><span data-m="review">&ldquo;exceeds expectations&rdquo;</span><span data-m="wine">&ldquo;medal&rdquo;</span><span data-m="med">&ldquo;recall the patient&rdquo;</span><span data-m="ump">&ldquo;strike&rdquo;</span></span>; for an LLM judge it is &ldquo;passes the policy&rdquo;.</p>
+  <p><b>Agreement: judges against each other.</b></p>
+  <ul>
+    <li id="l1-kappa"><b>Agreement beyond chance.</b> Two judges agree on some items by luck alone. Cohen's kappa counts only the agreement above that luck; Scott's pi does the same with a slightly different idea of luck. On the casebook, 75% raw agreement becomes kappa 0.49.</li>
+    <li id="l1-paradox"><b>The kappa paradoxes.</b> When YES is rare, judges agree on almost every NO for free, so 92% agreement can sit beside kappa 0.29. Nothing is broken; report agreement on YES and on NO separately.</li>
+    <li id="l1-fleiss"><b>Three or more judges.</b> Fleiss' kappa asks, item by item, how many pairs of judges agree, then removes chance the same way: 0.64 on the three-judge casebook. The items where judges split are the ones worth a human read.</li>
+    <li id="l1-alpha"><b>Krippendorff's alpha.</b> One formula, written in disagreement, for any number of judges, missing ratings and ordered scales. On complete yes/no data it lands next to pi and Fleiss.</li>
+    <li id="l1-weighted"><b>Weighted kappa.</b> On an ordered scale a near miss can earn partial credit. How much is a policy choice: one table gives 0.53, 0.59 or 0.65.</li>
+  </ul>
+  <p><b>Validity: a judge against the truth.</b></p>
+  <ul>
+    <li id="l1-confusion"><b>The confusion matrix.</b> Four counts: YES caught, YES missed, false YES, NO cleared. Sensitivity and specificity describe the judge; precision says how far to trust a YES verdict.</li>
+    <li id="l1-youden"><b>Youden's J.</b> One number for a yes/no judge: how much more often it says YES to truly-YES items than to truly-NO ones. A judge that ignores the item scores 0, a perfect one 1; the casebook judge 0.65.</li>
+    <li id="l1-base-rate"><b>Base rates.</b> Precision depends on how common YES is. The same judge is right on 70% of its YES calls when 30% of items are YES, and on 22% when 5% are.</li>
+    <li id="l1-roc"><b>The ROC curve.</b> A judge that gives scores needs a threshold to give verdicts. Each threshold trades YES items caught against false alarms; the ROC curve plots every trade.</li>
+    <li id="l1-auc"><b>AUC.</b> The area under that curve is the chance the judge ranks a random truly-YES item above a random truly-NO one: about 87% here. It says nothing about the one threshold you deploy.</li>
+  </ul>
+  <p><b>Uncertainty: how far a number would move on another sample.</b></p>
+  <ul>
+    <li id="l1-ci"><b>Confidence intervals.</b> Every number above would come out differently on another sample. The Wilson interval measures that for a proportion; a standard error or the bootstrap does it for kappa. On 100 items, kappa 0.49 could plausibly be anything from 0.32 to 0.66.</li>
+    <li id="l1-sample-size"><b>Sample size.</b> Interval width shrinks with the square root of the number of items, so halving it costs four times the labels. Pick the width your decision needs, then label that many.</li>
+  </ul>
+
+  <h2 id="layer-2"><span class="tag wb">LAYER 2</span> Each idea with its formula</h2>
+  <p>The same twelve ideas, each as one core formula, what its symbols mean, and the casebook result. Notation: <i>n</i> items, <i>p</i> a proportion, and a 2&times;2 table with cells <i>a</i>, <i>b</i>, <i>c</i>, <i>d</i> left to right, top to bottom (judge A's YES row first, judge B's YES column first).</p>
+
+  <h3 id="l2-kappa">Agreement beyond chance: kappa and pi</h3>
+  <div class="eq">&kappa; = (p<sub>o</sub> &minus; p<sub>e</sub>) / (1 &minus; p<sub>e</sub>)</div>
+  <p>p<sub>o</sub> = (a + d) / n is the share of items where the judges agree. p<sub>e</sub> = p<sub>A,yes</sub> &middot; p<sub>B,yes</sub> + p<sub>A,no</sub> &middot; p<sub>B,no</sub> is chance agreement: what two judges with these YES rates would reach by rating independently. Scott's &pi; uses the same formula with chance from the pooled YES rate p&#772; = (p<sub>A,yes</sub> + p<sub>B,yes</sub>) / 2. Casebook: p<sub>o</sub> 0.75, p<sub>e</sub> 0.51, &kappa; 0.49, &pi; 0.489. <a class="lnk" href="#kappa">Worked &darr;</a></p>
+
+  <h3 id="l2-paradox">The kappa paradoxes</h3>
+  <div class="eq">&kappa; = (PABAK &minus; PI&sup2; + BI&sup2;) / (1 &minus; PI&sup2; + BI&sup2;)</div>
+  <p>PI = (a &minus; d) / n is the prevalence index, BI = (b &minus; c) / n the bias index, PABAK = 2p<sub>o</sub> &minus; 1. A large PI is squared and subtracted, dragging kappa down; BI is squared and added. Report beside kappa the agreement on each label: p<sub>pos</sub> = 2a / (2a + b + c) and p<sub>neg</sub> = 2d / (2d + b + c). Rare-YES table: p<sub>o</sub> 0.92, &kappa; 0.29, p<sub>pos</sub> 0.333, p<sub>neg</sub> 0.957. <a class="lnk" href="#paradox">Worked &darr;</a></p>
+
+  <h3 id="l2-fleiss">Fleiss' kappa: three or more judges</h3>
+  <div class="eq">&kappa;<sub>F</sub> = (P&#772; &minus; P<sub>e</sub>) / (1 &minus; P<sub>e</sub>)</div>
+  <p><i>m</i> judges; n<sub>ij</sub> votes for category <i>j</i> on item <i>i</i>. P<sub>i</sub> = &Sigma;<sub>j</sub> n<sub>ij</sub>(n<sub>ij</sub> &minus; 1) / (m(m &minus; 1)) is the share of ordered judge pairs that agree on item <i>i</i>, and P&#772; its mean. p<sub>j</sub> is the share of all votes in category <i>j</i>, and P<sub>e</sub> = &Sigma;<sub>j</sub> p<sub>j</sub>&sup2;. Three-judge casebook: P&#772; 0.82, P<sub>e</sub> 0.5002, &kappa;<sub>F</sub> 0.64. <a class="lnk" href="#fleiss">Worked &darr;</a></p>
+
+  <h3 id="l2-alpha">Krippendorff's alpha</h3>
+  <div class="eq">&alpha; = 1 &minus; D<sub>o</sub> / D<sub>e</sub> = 1 &minus; (n &minus; 1) &middot; &Sigma; o<sub>vv'</sub> &delta;(v, v') / &Sigma; n<sub>v</sub> n<sub>v'</sub> &delta;(v, v')</div>
+  <p>D<sub>o</sub> and D<sub>e</sub> are observed and expected disagreement. o<sub>vv'</sub> is the coincidence matrix: every ordered pair of values from different judges on the same item, weighted 1/(m<sub>u</sub> &minus; 1) when m<sub>u</sub> judges rated the item. n<sub>v</sub> counts each value's use and <i>n</i> all ratings. &delta; is the distance between values: 1 if they differ (nominal), (v &minus; v')&sup2; on an interval scale. Casebook: 0.491 for two judges, 0.641 for three. <a class="lnk" href="#alpha">Worked &darr;</a></p>
+
+  <h3 id="l2-weighted">Weighted kappa</h3>
+  <div class="eq">&kappa;<sub>w</sub> = (p<sub>o,w</sub> &minus; p<sub>e,w</sub>) / (1 &minus; p<sub>e,w</sub>) &nbsp;&nbsp; p<sub>o,w</sub> = &Sigma; w<sub>ij</sub> p<sub>ij</sub> &nbsp;&nbsp; p<sub>e,w</sub> = &Sigma; w<sub>ij</sub> p<sub>i&middot;</sub> p<sub>&middot;j</sub></div>
+  <p>p<sub>ij</sub> is the share of items in cell (<i>i</i>, <i>j</i>); p<sub>i&middot;</sub> and p<sub>&middot;j</sub> are row and column shares. w<sub>ij</sub> is the credit for that cell, categories 1 to <i>k</i>: linear 1 &minus; |i &minus; j| / (k &minus; 1), quadratic 1 &minus; (i &minus; j)&sup2; / (k &minus; 1)&sup2;. Off-diagonal weights of 0 give plain kappa. The 3&times;3 example: unweighted 0.533, linear 0.592, quadratic 0.655. <a class="lnk" href="#weighted">Worked &darr;</a></p>
+
+  <h3 id="l2-confusion">The confusion matrix</h3>
+  <div class="eq">sensitivity = TP / (TP + FN) &nbsp;&nbsp; specificity = TN / (TN + FP) &nbsp;&nbsp; precision = TP / (TP + FP)</div>
+  <p>TP: truly YES, called YES. FN: truly YES, called NO. FP: truly NO, called YES. TN: truly NO, called NO. Sensitivity and specificity divide by the truth (rows); precision and NPV = TN / (TN + FN) divide by the verdict (columns). Casebook, 200 items, 60 truly YES: 0.80, 0.85, 0.696. <a class="lnk" href="#confusion">Worked &darr;</a></p>
+
+  <h3 id="l2-youden">Youden's J</h3>
+  <div class="eq">J = sensitivity + specificity &minus; 1 = TPR &minus; FPR</div>
+  <p>TPR is sensitivity; FPR = 1 &minus; specificity is the share of truly-NO items called YES. Balanced accuracy = (J + 1) / 2 is the same number on a scale where chance is 0.5. Casebook: J 0.65, balanced accuracy 0.825. <a class="lnk" href="#youden">Worked &darr;</a></p>
+
+  <h3 id="l2-base-rate">Base rates and precision</h3>
+  <div class="eq">precision = sens&middot;&pi; / (sens&middot;&pi; + (1 &minus; spec)&middot;(1 &minus; &pi;))</div>
+  <p>&pi; is the base rate, the share of items truly YES. The numerator is the correct-YES mass; the second term is the false-YES mass from the truly-NO pool, which grows as &pi; shrinks. Casebook judge: 0.696 at &pi; = 30%, 0.219 at &pi; = 5%. <a class="lnk" href="#base-rate">Worked &darr;</a></p>
+
+  <h3 id="l2-roc">The ROC curve</h3>
+  <div class="eq">rule: YES if score &ge; t &nbsp;&nbsp; TPR(t) = TP(t) / 60 &nbsp;&nbsp; FPR(t) = FP(t) / 140</div>
+  <p><i>t</i> is a threshold on the judge's 1&ndash;5 score; TP(t) and FP(t) count truly-YES and truly-NO items at or above it, out of 60 and 140. Each threshold is one point (FPR, TPR); joining them from (0, 0) to (1, 1) gives the curve. The best J is at score &ge; 4: (0.15, 0.80). <a class="lnk" href="#roc">Worked &darr;</a></p>
+
+  <h3 id="l2-auc">AUC</h3>
+  <div class="eq">AUC = &Sigma; (FPR<sub>k+1</sub> &minus; FPR<sub>k</sub>) &middot; (TPR<sub>k</sub> + TPR<sub>k+1</sub>) / 2</div>
+  <p><i>k</i> runs over consecutive ROC points, so each term is one trapezoid. The sum equals the probability that a random truly-YES item outscores a random truly-NO one, ties counted half. Casebook: 0.868 both ways (trapezoids, and counting all 8,400 pairs); Hanley&ndash;McNeil standard error 0.031. <a class="lnk" href="#auc">Worked &darr;</a></p>
+
+  <h3 id="l2-ci">Confidence intervals</h3>
+  <div class="eq">Wilson: centre = (p&#770; + z&sup2;/2n) / (1 + z&sup2;/n) &nbsp;&nbsp; half-width = z &radic;(p&#770;(1 &minus; p&#770;)/n + z&sup2;/4n&sup2;) / (1 + z&sup2;/n)</div>
+  <div class="eq">kappa: SE(&kappa;) &asymp; &radic;( p<sub>o</sub>(1 &minus; p<sub>o</sub>) / (n (1 &minus; p<sub>e</sub>)&sup2;) ) &nbsp;&nbsp; 95% CI: &kappa; &plusmn; 1.96 &middot; SE</div>
+  <p>p&#770; is the observed proportion, <i>n</i> the items it is computed on, z = 1.96 for 95%. The bootstrap needs no formula: resample the items with replacement, recompute thousands of times, keep the middle 95%. Casebook: sensitivity 48/60 gives 0.682 to 0.882; kappa gives 0.32 to 0.66 by formula and 0.31 to 0.66 by bootstrap. <a class="lnk" href="#ci">Worked &darr;</a></p>
+
+  <h3 id="l2-sample-size">Sample size</h3>
+  <div class="eq">proportion: n &asymp; z&sup2; p(1 &minus; p) / h&sup2; &nbsp;&nbsp; kappa: n &asymp; z&sup2; p<sub>o</sub>(1 &minus; p<sub>o</sub>) / (h&sup2; (1 &minus; p<sub>e</sub>)&sup2;)</div>
+  <p><i>h</i> is the half-width you can live with, <i>p</i> the proportion you expect; for a sensitivity, <i>n</i> counts only truly-YES items. A proportion near 0.8 to &plusmn;0.05 needs 246 items; casebook-like kappa to &plusmn;0.10 needs 300. <a class="lnk" href="#sample-size">Worked &darr;</a></p>
+
+  <h2 id="layer-3"><span class="tag wb">LAYER 3</span> Every idea, worked in full</h2>
+  <p class="lead">Each section states a formula, its source, and works it on the casebook numbers, computed by script and re-derived by hand (unrounded value first).</p>
 
   <h2 id="kappa">Agreement beyond chance: percent agreement, Cohen's kappa, Scott's pi</h2>
   <p>Each of 100 items is judged by both judges; the table counts the four pairs of verdicts.</p>
